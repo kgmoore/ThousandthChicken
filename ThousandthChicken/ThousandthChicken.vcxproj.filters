@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="DWT">
+      <UniqueIdentifier>{511613ac-2210-4856-9d83-cb97e3d89e3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform">
+      <UniqueIdentifier>{91f57477-163b-4388-b49b-005ff218064b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Intel_OpenCL_Build_Rules Include="dwt.cl">
+      <Filter>DWT</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="dwt_common.cl">
+      <Filter>DWT</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="dwt_f53.cl">
+      <Filter>DWT</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="dwt_f97.cl">
+      <Filter>DWT</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="dwt_io.cl">
+      <Filter>DWT</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="dwt_r53.cl">
+      <Filter>DWT</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="dwt_r97.cl">
+      <Filter>DWT</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="dwt_transform_buffer.cl">
+      <Filter>DWT</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="platform.cl">
+      <Filter>Platform</Filter>
+    </Intel_OpenCL_Build_Rules>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DWTForward53.cpp">
+      <Filter>DWT</Filter>
+    </ClCompile>
+    <ClCompile Include="DWTForward97.cpp">
+      <Filter>DWT</Filter>
+    </ClCompile>
+    <ClCompile Include="DWTKernel.cpp">
+      <Filter>DWT</Filter>
+    </ClCompile>
+    <ClCompile Include="DWTReverse53.cpp">
+      <Filter>DWT</Filter>
+    </ClCompile>
+    <ClCompile Include="DWTReverse97.cpp">
+      <Filter>DWT</Filter>
+    </ClCompile>
+    <ClCompile Include="GenericKernel.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="ocl_util.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DWTForward53.h">
+      <Filter>DWT</Filter>
+    </ClInclude>
+    <ClInclude Include="DWTForward97.h">
+      <Filter>DWT</Filter>
+    </ClInclude>
+    <ClInclude Include="DWTKernel.h">
+      <Filter>DWT</Filter>
+    </ClInclude>
+    <ClInclude Include="DWTReverse53.h">
+      <Filter>DWT</Filter>
+    </ClInclude>
+    <ClInclude Include="DWTReverse97.h">
+      <Filter>DWT</Filter>
+    </ClInclude>
+    <ClInclude Include="GenericKernel.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="ocl_util.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="platform.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
