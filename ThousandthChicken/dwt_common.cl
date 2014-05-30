@@ -1,7 +1,7 @@
 #pragma once
 
 #include "platform.cl"
-#include "utils.h"
+#include "dwt_common.h"
 
 	  
 // FDWT 9/7 scaling coefficients

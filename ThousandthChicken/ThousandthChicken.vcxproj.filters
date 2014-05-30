@@ -4,9 +4,6 @@
     <Filter Include="DWT">
       <UniqueIdentifier>{511613ac-2210-4856-9d83-cb97e3d89e3f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Platform">
-      <UniqueIdentifier>{91f57477-163b-4388-b49b-005ff218064b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Preprocessor">
       <UniqueIdentifier>{bc3e44ab-27b5-42e4-b6ea-99f3fb1f0ea9}</UniqueIdentifier>
     </Filter>
@@ -19,8 +16,23 @@
     <Filter Include="Codestream">
       <UniqueIdentifier>{982f7ae6-3e89-494e-9c61-f5a57d79ce89}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common">
-      <UniqueIdentifier>{c9aa5a88-3aa6-4bbd-9e3b-21ca105d9270}</UniqueIdentifier>
+    <Filter Include="IO">
+      <UniqueIdentifier>{1f7a8b4d-378b-476c-906d-63b445854d56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Logging">
+      <UniqueIdentifier>{db614c1b-88c3-4db9-a6c7-c3668837030c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Config">
+      <UniqueIdentifier>{bc735203-9adb-4438-9e60-070957a7edda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Encoder">
+      <UniqueIdentifier>{f9622824-4bd2-4cd2-9e6f-258045bc4a2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Decoder">
+      <UniqueIdentifier>{87cc863a-96e6-4f26-9de9-0a5d01e4ef6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GPU">
+      <UniqueIdentifier>{91f57477-163b-4388-b49b-005ff218064b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -49,7 +61,7 @@
       <Filter>DWT</Filter>
     </Intel_OpenCL_Build_Rules>
     <Intel_OpenCL_Build_Rules Include="platform.cl">
-      <Filter>Platform</Filter>
+      <Filter>GPU</Filter>
     </Intel_OpenCL_Build_Rules>
   </ItemGroup>
   <ItemGroup>
@@ -69,13 +81,29 @@
       <Filter>DWT</Filter>
     </ClCompile>
     <ClCompile Include="GenericKernel.cpp">
-      <Filter>Platform</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Platform</Filter>
+      <Filter>GPU</Filter>
     </ClCompile>
     <ClCompile Include="ocl_util.cpp">
-      <Filter>Platform</Filter>
+      <Filter>GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="io_buffered_stream.c">
+      <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="logger.c">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="codestream.c">
+      <Filter>Codestream</Filter>
+    </ClCompile>
+    <ClCompile Include="codestream_image_mct.c">
+      <Filter>Codestream</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="codestream_image.c">
+      <Filter>Codestream</Filter>
+    </ClCompile>
+    <ClCompile Include="codestream_tag_tree_encode.c">
+      <Filter>Codestream</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -95,16 +123,46 @@
       <Filter>DWT</Filter>
     </ClInclude>
     <ClInclude Include="GenericKernel.h">
-      <Filter>Platform</Filter>
+      <Filter>GPU</Filter>
     </ClInclude>
     <ClInclude Include="ocl_util.h">
-      <Filter>Platform</Filter>
+      <Filter>GPU</Filter>
     </ClInclude>
     <ClInclude Include="platform.h">
-      <Filter>Platform</Filter>
+      <Filter>GPU</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
-      <Filter>Platform</Filter>
+    <ClInclude Include="dwt_common.h">
+      <Filter>DWT</Filter>
+    </ClInclude>
+    <ClInclude Include="io_buffered_stream.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="logger.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="codestream_markers.h">
+      <Filter>Codestream</Filter>
+    </ClInclude>
+    <ClInclude Include="codestream.h">
+      <Filter>Codestream</Filter>
+    </ClInclude>
+    <ClInclude Include="codestream_image_types.h">
+      <Filter>Codestream</Filter>
+    </ClInclude>
+    <ClInclude Include="codestream_image_mct.h">
+      <Filter>Codestream</Filter>
+    </ClInclude>
+    <ClInclude Include="codestream_tag_tree.h">
+      <Filter>Codestream</Filter>
+    </ClInclude>
+    <ClInclude Include="codestream_tag_tree_encode.h">
+      <Filter>Codestream</Filter>
+    </ClInclude>
+    <ClInclude Include="codestream_image.h">
+      <Filter>Codestream</Filter>
+    </ClInclude>
+    <ClInclude Include="config_parameters.h">
+      <Filter>Config</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

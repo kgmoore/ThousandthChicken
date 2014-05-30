@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DWTKernel.h"
-#include "utils.h"
+#include "dwt_common.h"
 
 
 template <typename T> DWTKernel<T>::DWTKernel(int impulseDiameter, 

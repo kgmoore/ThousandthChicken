@@ -5,7 +5,6 @@
 using namespace cv;
 
 #include "ocl_util.h"
-#include "utils.h"
 
 #include "DWTForward53.h"
 #include "DWTReverse53.h"
@@ -126,8 +125,8 @@ int main(int argc, char* argv[])
 	const bool isLossy = false;
 	const bool writeOutput = false;
 	if (isLossy) {
-		DWTForward97* fdwt97 = new DWTForward97(DwtKernelInitInfo(ocl.commandQueue, "-g -s \"c:\\src\\ocldwt\\ocldwt\\dwt_f97.cl\""));
-		DWTReverse97* rdwt97 = new DWTReverse97(DwtKernelInitInfo(ocl.commandQueue, "-g -s \"c:\\src\\ocldwt\\ocldwt\\dwt_r97.cl\""));
+		DWTForward97* fdwt97 = new DWTForward97(DwtKernelInitInfo(ocl.commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_f97.cl\""));
+		DWTReverse97* rdwt97 = new DWTReverse97(DwtKernelInitInfo(ocl.commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_r97.cl\""));
 
 		float* input = new float[imageSize];
 		for (int i = 0; i < imageSize; ++i) {
@@ -151,8 +150,8 @@ int main(int argc, char* argv[])
 
 	} else {
 		
-		DWTForward53* fdwt53 = new DWTForward53( DwtKernelInitInfo(ocl.commandQueue, "-g -s \"c:\\src\\ocldwt\\ocldwt\\dwt_f53.cl\""));
-		DWTReverse53* rdwt53 = new DWTReverse53( DwtKernelInitInfo(ocl.commandQueue, "-g -s \"c:\\src\\ocldwt\\ocldwt\\dwt_r53.cl\""));
+		DWTForward53* fdwt53 = new DWTForward53( DwtKernelInitInfo(ocl.commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_f53.cl\""));
+		DWTReverse53* rdwt53 = new DWTReverse53( DwtKernelInitInfo(ocl.commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_r53.cl\""));
 
 
 		int* input = new int[imageSize];

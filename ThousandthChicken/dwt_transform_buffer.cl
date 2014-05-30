@@ -1,7 +1,7 @@
 #pragma once
 
 #include "platform.cl"
-#include "utils.h"
+#include "dwt_common.h"
 
   //////////////////////////////////////////////////////////////////////////////////////////////
   /// Info relating to buffer (in local memory of GPU) where block of input image is stored.
