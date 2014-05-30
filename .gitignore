@@ -1,3 +1,4 @@
+*.opensdf
 *.png
 *.sdf
 #ignore thumbnails created by windows

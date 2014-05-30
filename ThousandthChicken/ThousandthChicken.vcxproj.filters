@@ -7,6 +7,21 @@
     <Filter Include="Platform">
       <UniqueIdentifier>{91f57477-163b-4388-b49b-005ff218064b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Preprocessor">
+      <UniqueIdentifier>{bc3e44ab-27b5-42e4-b6ea-99f3fb1f0ea9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quantizer">
+      <UniqueIdentifier>{23ddf312-8e04-42c7-8afc-e317f5ea1ccf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoefficientCoder">
+      <UniqueIdentifier>{e263a65f-9739-46b3-a641-44cca614c8fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Codestream">
+      <UniqueIdentifier>{982f7ae6-3e89-494e-9c61-f5a57d79ce89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{c9aa5a88-3aa6-4bbd-9e3b-21ca105d9270}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Intel_OpenCL_Build_Rules Include="dwt.cl">
