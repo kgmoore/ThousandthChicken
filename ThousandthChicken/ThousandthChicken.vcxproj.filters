@@ -34,6 +34,9 @@
     <Filter Include="GPU">
       <UniqueIdentifier>{91f57477-163b-4388-b49b-005ff218064b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="FileFormat">
+      <UniqueIdentifier>{ff6ba567-e04f-4bba-bf2d-e7ca71341c33}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Intel_OpenCL_Build_Rules Include="dwt.cl">
@@ -105,6 +108,18 @@
     <ClCompile Include="codestream_tag_tree_encode.c">
       <Filter>Codestream</Filter>
     </ClCompile>
+    <ClCompile Include="boxes.c">
+      <Filter>FileFormat</Filter>
+    </ClCompile>
+    <ClCompile Include="config_parameters.c">
+      <Filter>Config</Filter>
+    </ClCompile>
+    <ClCompile Include="Decoder.cpp">
+      <Filter>Decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="DWTTest.cpp">
+      <Filter>DWT</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DWTForward53.h">
@@ -163,6 +178,15 @@
     </ClInclude>
     <ClInclude Include="config_parameters.h">
       <Filter>Config</Filter>
+    </ClInclude>
+    <ClInclude Include="boxes.h">
+      <Filter>FileFormat</Filter>
+    </ClInclude>
+    <ClInclude Include="Decoder.h">
+      <Filter>Decoder</Filter>
+    </ClInclude>
+    <ClInclude Include="DWTTest.h">
+      <Filter>DWT</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

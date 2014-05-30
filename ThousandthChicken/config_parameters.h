@@ -25,6 +25,8 @@ typedef struct _type_parameters {
 } type_parameters;
 
 
+void default_config_values(type_parameters *param);
+
 
 #ifdef __cplusplus
 }

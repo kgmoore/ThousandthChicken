@@ -30,15 +30,19 @@
     <Intel_OpenCL_Build_Rules Include="platform.cl" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="boxes.c" />
     <ClCompile Include="codestream.c" />
     <ClCompile Include="codestream_image.c" />
     <ClCompile Include="codestream_image_mct.c" />
     <ClCompile Include="codestream_tag_tree_encode.c" />
+    <ClCompile Include="config_parameters.c" />
+    <ClCompile Include="Decoder.cpp" />
     <ClCompile Include="DWTForward53.cpp" />
     <ClCompile Include="DWTForward97.cpp" />
     <ClCompile Include="DWTKernel.cpp" />
     <ClCompile Include="DWTReverse53.cpp" />
     <ClCompile Include="DWTReverse97.cpp" />
+    <ClCompile Include="DWTTest.cpp" />
     <ClCompile Include="GenericKernel.cpp" />
     <ClCompile Include="io_buffered_stream.c" />
     <ClCompile Include="logger.c" />
@@ -46,6 +50,7 @@
     <ClCompile Include="ocl_util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="boxes.h" />
     <ClInclude Include="codestream.h" />
     <ClInclude Include="codestream_image.h" />
     <ClInclude Include="codestream_image_mct.h" />
@@ -54,11 +59,13 @@
     <ClInclude Include="codestream_tag_tree.h" />
     <ClInclude Include="codestream_tag_tree_encode.h" />
     <ClInclude Include="config_parameters.h" />
+    <ClInclude Include="Decoder.h" />
     <ClInclude Include="DWTForward53.h" />
     <ClInclude Include="DWTForward97.h" />
     <ClInclude Include="DWTKernel.h" />
     <ClInclude Include="DWTReverse53.h" />
     <ClInclude Include="DWTReverse97.h" />
+    <ClInclude Include="DWTTest.h" />
     <ClInclude Include="dwt_common.h" />
     <ClInclude Include="GenericKernel.h" />
     <ClInclude Include="io_buffered_stream.h" />
