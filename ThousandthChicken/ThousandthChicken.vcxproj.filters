@@ -69,6 +69,9 @@
     <Intel_OpenCL_Build_Rules Include="coefficient_coder.cl">
       <Filter>CoefficientCoder</Filter>
     </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="quantizer.cl">
+      <Filter>Quantizer</Filter>
+    </Intel_OpenCL_Build_Rules>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DWTForward53.cpp">
@@ -128,6 +131,9 @@
     </ClCompile>
     <ClCompile Include="basic.cpp">
       <Filter>GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Quantizer.cpp">
+      <Filter>Quantizer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -205,6 +211,9 @@
     </ClInclude>
     <ClInclude Include="basic.h">
       <Filter>GPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Quantizer.h">
+      <Filter>Quantizer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

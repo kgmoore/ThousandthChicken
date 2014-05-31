@@ -15,6 +15,7 @@
 #include "codestream.h"
 #include "basic.h"
 #include "CoefficientCoder.h"
+#include "Quantizer.h"
 
 
 
@@ -66,6 +67,8 @@ int Decoder::decode(ocl_args_d_t* ocl)
 	unsigned int i,j;
 
 	CoefficientCoder coder( KernelInitInfoBase(ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\coefficient_coder.cl\""*/""));
+	Quantizer quantizer( KernelInitInfoBase(ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/""));
+
 
 	if(strstr(img->in_file, ".jp2") != NULL) {
 		println(INFO, "It's a JP2 file");
@@ -98,7 +101,7 @@ int Decoder::decode(ocl_args_d_t* ocl)
 			/* Decode data */
 			coder.decode_tile(tile);
 			/* Dequantize data */
-			//dequant.dequantize_tile(tile);
+			quantizer.dequantize_tile(tile);
 			/* Do inverse wavelet transform */
 			//dwt.iwt(tile);
 		}
@@ -136,7 +139,7 @@ int Decoder::decode(ocl_args_d_t* ocl)
 			/* Decode data */
 			coder.decode_tile(tile);
 			/* Dequantize data */
-			//dequant.dequantize_tile(tile);
+			quantizer.dequantize_tile(tile);
 			/* Do inverse wavelet transform */
 			//dwt.iwt(tile);
 		}
