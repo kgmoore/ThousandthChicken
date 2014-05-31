@@ -1,7 +1,7 @@
 #include "DWTReverse97.h"
 #include "DWTKernel.cpp"
 
-DWTReverse97::DWTReverse97(DwtKernelInitInfo initInfo) : DWTKernel<float>(7, KernelInitInfo(initInfo, "dwt_r97.cl", "run") )
+DWTReverse97::DWTReverse97(KernelInitInfoBase initInfo) : DWTKernel<float>(7, KernelInitInfo(initInfo, "dwt_r97.cl", "run") )
 {
 
 }

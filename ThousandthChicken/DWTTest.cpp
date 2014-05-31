@@ -70,8 +70,8 @@ void DWTTest::test(ocl_args_d_t* ocl)
 	const bool isLossy = false;
 	const bool writeOutput = false;
 	if (isLossy) {
-		DWTForward97* fdwt97 = new DWTForward97(DwtKernelInitInfo(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_f97.cl\""));
-		DWTReverse97* rdwt97 = new DWTReverse97(DwtKernelInitInfo(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_r97.cl\""));
+		DWTForward97* fdwt97 = new DWTForward97(KernelInitInfoBase(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_f97.cl\""));
+		DWTReverse97* rdwt97 = new DWTReverse97(KernelInitInfoBase(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_r97.cl\""));
 
 		float* input = new float[imageSize];
 		for (int i = 0; i < imageSize; ++i) {
@@ -95,8 +95,8 @@ void DWTTest::test(ocl_args_d_t* ocl)
 
 	} else {
 		
-		DWTForward53* fdwt53 = new DWTForward53( DwtKernelInitInfo(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_f53.cl\""));
-		DWTReverse53* rdwt53 = new DWTReverse53( DwtKernelInitInfo(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_r53.cl\""));
+		DWTForward53* fdwt53 = new DWTForward53( KernelInitInfoBase(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_f53.cl\""));
+		DWTReverse53* rdwt53 = new DWTReverse53( KernelInitInfoBase(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_r53.cl\""));
 
 
 		int* input = new int[imageSize];

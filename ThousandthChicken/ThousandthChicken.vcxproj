@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <Intel_OpenCL_Build_Rules Include="coefficient_coder.cl" />
     <Intel_OpenCL_Build_Rules Include="dwt.cl" />
     <Intel_OpenCL_Build_Rules Include="dwt_common.cl" />
     <Intel_OpenCL_Build_Rules Include="dwt_f53.cl" />
@@ -30,11 +31,13 @@
     <Intel_OpenCL_Build_Rules Include="platform.cl" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="basic.cpp" />
     <ClCompile Include="boxes.c" />
     <ClCompile Include="codestream.c" />
     <ClCompile Include="codestream_image.c" />
     <ClCompile Include="codestream_image_mct.c" />
     <ClCompile Include="codestream_tag_tree_encode.c" />
+    <ClCompile Include="CoefficientCoder.cpp" />
     <ClCompile Include="config_parameters.c" />
     <ClCompile Include="Decoder.cpp" />
     <ClCompile Include="DWTForward53.cpp" />
@@ -50,6 +53,7 @@
     <ClCompile Include="ocl_util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="basic.h" />
     <ClInclude Include="boxes.h" />
     <ClInclude Include="codestream.h" />
     <ClInclude Include="codestream_image.h" />
@@ -58,6 +62,8 @@
     <ClInclude Include="codestream_markers.h" />
     <ClInclude Include="codestream_tag_tree.h" />
     <ClInclude Include="codestream_tag_tree_encode.h" />
+    <ClInclude Include="CoefficientCoder.h" />
+    <ClInclude Include="coefficientcoder_common.h" />
     <ClInclude Include="config_parameters.h" />
     <ClInclude Include="Decoder.h" />
     <ClInclude Include="DWTForward53.h" />

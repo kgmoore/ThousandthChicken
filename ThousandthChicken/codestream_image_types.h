@@ -75,6 +75,9 @@ struct type_codeblock
 
 	/** Number of coding passes */
 	unsigned int num_coding_passes;
+
+	// decoded coefficients offset for this codeblock
+	int d_coefficientsOffset;
 };
 
 /** Subband coding parameters */

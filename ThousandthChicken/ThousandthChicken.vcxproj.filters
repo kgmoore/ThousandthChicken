@@ -66,6 +66,9 @@
     <Intel_OpenCL_Build_Rules Include="platform.cl">
       <Filter>GPU</Filter>
     </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="coefficient_coder.cl">
+      <Filter>CoefficientCoder</Filter>
+    </Intel_OpenCL_Build_Rules>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DWTForward53.cpp">
@@ -119,6 +122,12 @@
     </ClCompile>
     <ClCompile Include="DWTTest.cpp">
       <Filter>DWT</Filter>
+    </ClCompile>
+    <ClCompile Include="CoefficientCoder.cpp">
+      <Filter>CoefficientCoder</Filter>
+    </ClCompile>
+    <ClCompile Include="basic.cpp">
+      <Filter>GPU</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -187,6 +196,15 @@
     </ClInclude>
     <ClInclude Include="DWTTest.h">
       <Filter>DWT</Filter>
+    </ClInclude>
+    <ClInclude Include="coefficientcoder_common.h">
+      <Filter>CoefficientCoder</Filter>
+    </ClInclude>
+    <ClInclude Include="CoefficientCoder.h">
+      <Filter>CoefficientCoder</Filter>
+    </ClInclude>
+    <ClInclude Include="basic.h">
+      <Filter>GPU</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

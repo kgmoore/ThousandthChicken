@@ -1,7 +1,7 @@
 #include "DWTForward97.h"
 #include "DWTKernel.cpp"
 
-DWTForward97::DWTForward97(DwtKernelInitInfo initInfo) : DWTKernel<float>(7, KernelInitInfo(initInfo, "dwt_f97.cl", "run") )
+DWTForward97::DWTForward97(KernelInitInfoBase initInfo) : DWTKernel<float>(7, KernelInitInfo(initInfo, "dwt_f97.cl", "run") )
 {
 }
 

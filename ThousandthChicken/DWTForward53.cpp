@@ -1,7 +1,7 @@
 #include "DWTForward53.h"
 #include "DWTKernel.cpp"
 
-DWTForward53::DWTForward53(DwtKernelInitInfo initInfo) : DWTKernel<int>(3,KernelInitInfo(initInfo, "dwt_f53.cl", "run") )
+DWTForward53::DWTForward53(KernelInitInfoBase initInfo) : DWTKernel<int>(3,KernelInitInfo(initInfo, "dwt_f53.cl", "run") )
 {
 }
 

@@ -1,7 +1,7 @@
 #include "DWTReverse53.h"
 #include "DWTKernel.cpp"
 
-DWTReverse53::DWTReverse53(DwtKernelInitInfo initInfo) : DWTKernel<int>(3,	KernelInitInfo(initInfo, "dwt_r53.cl", "run") )
+DWTReverse53::DWTReverse53(KernelInitInfoBase initInfo) : DWTKernel<int>(3,	KernelInitInfo(initInfo, "dwt_r53.cl", "run") )
 {
 
 }

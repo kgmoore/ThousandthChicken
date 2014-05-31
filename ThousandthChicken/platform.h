@@ -9,13 +9,13 @@ typedef cl_mem tDeviceMem;
 typedef cl_int tDeviceInt;
 #define DeviceSuccess CL_SUCCESS
 
-struct DwtKernelInitInfo {
+struct KernelInitInfoBase {
 
-	DwtKernelInitInfo(cl_command_queue queue, string bldOptions) :
+	KernelInitInfoBase(cl_command_queue queue, string bldOptions) :
 		                                 cmd_queue(queue), 
 										 buildOptions(bldOptions)
 	{}
-	DwtKernelInitInfo(const DwtKernelInitInfo& other) : 
+	KernelInitInfoBase(const KernelInitInfoBase& other) : 
 		                                 cmd_queue(other.cmd_queue),
 										 buildOptions(other.buildOptions)
 	{
@@ -24,17 +24,17 @@ struct DwtKernelInitInfo {
 	string buildOptions;
 };
 
-struct KernelInitInfo : DwtKernelInitInfo {
+struct KernelInitInfo : KernelInitInfoBase {
 	KernelInitInfo(cl_command_queue queue,
 					string progName,
 					string knlName,
-					string bldOptions) : DwtKernelInitInfo(queue, bldOptions), 
+					string bldOptions) : KernelInitInfoBase(queue, bldOptions), 
 					                     programName(progName),
 										 kernelName(knlName)
 	{}
-	KernelInitInfo(DwtKernelInitInfo dwtInfo,
+	KernelInitInfo(KernelInitInfoBase dwtInfo,
 					string progName,
-					string knlName) : DwtKernelInitInfo(dwtInfo), 
+					string knlName) : KernelInitInfoBase(dwtInfo), 
 					                     programName(progName),
 										 kernelName(knlName)
 	{}
