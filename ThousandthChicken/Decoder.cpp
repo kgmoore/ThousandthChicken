@@ -1,3 +1,7 @@
+#include "platform.h"
+
+#include "ocl_util.h"
+
 #include "Decoder.h"
 
 #include <stdio.h>
@@ -9,6 +13,9 @@
 #include "boxes.h"
 #include "io_buffered_stream.h"
 #include "codestream.h"
+#include "basic.h"
+#include "CoefficientCoder.h"
+
 
 
 
@@ -39,7 +46,7 @@ void init_dec_buffer(FILE *fsrc, type_buffer *src_buff) {
 }
 
 
-int Decoder::decode(void)
+int Decoder::decode(ocl_args_d_t* ocl)
 {
 	//	println_start(INFO);
 	type_image *img = (type_image *)malloc(sizeof(type_image));
@@ -58,6 +65,8 @@ int Decoder::decode(void)
 	type_tile *tile;
 	unsigned int i,j;
 
+	CoefficientCoder coder( KernelInitInfoBase(ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\coefficient_coder.cl\""*/""));
+
 	if(strstr(img->in_file, ".jp2") != NULL) {
 		println(INFO, "It's a JP2 file");
 
@@ -72,14 +81,14 @@ int Decoder::decode(void)
 				//		println_var(INFO, "%d\n", i);
 				type_tile_comp* tile_comp = tile->tile_comp + j;
 
-				/*
+				
 				//allocate image tile component memory on device 
 				cl_int err = CL_SUCCESS;
-				tile_comp->img_data_d = (type_data*)clCreateBuffer(oclObjects.context, CL_MEM_READ_WRITE, tile_comp->width * tile_comp->height * sizeof(type_data), NULL, &err);
+				tile_comp->img_data_d = (type_data*)clCreateBuffer(ocl->context, CL_MEM_READ_WRITE, tile_comp->width * tile_comp->height * sizeof(type_data), NULL, &err);
 				SAMPLE_CHECK_ERRORS(err);
 				if (tile_comp->img_data_d  == 0)
 					throw Error("Failed to create tile component Buffer!");
-*/
+
 			}
 		}
 
@@ -87,7 +96,7 @@ int Decoder::decode(void)
 		for(i = 0; i < img->num_tiles; i++) {
 			tile = &(img->tile[i]);
 			/* Decode data */
-			//coefficientCoder.decode_tile(tile);
+			coder.decode_tile(tile);
 			/* Dequantize data */
 			//dequant.dequantize_tile(tile);
 			/* Do inverse wavelet transform */
@@ -125,7 +134,7 @@ int Decoder::decode(void)
 		for(i = 0; i < img->num_tiles; i++)	{
 			tile = &(img->tile[i]);
 			/* Decode data */
-			//coefficientCoder.decode_tile(tile);
+			coder.decode_tile(tile);
 			/* Dequantize data */
 			//dequant.dequantize_tile(tile);
 			/* Do inverse wavelet transform */

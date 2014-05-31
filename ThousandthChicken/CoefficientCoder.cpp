@@ -18,7 +18,7 @@
 using namespace std;
 
 
-CoefficientCoder::CoefficientCoder(KernelInitInfoBase initInfo) : GenericKernel( KernelInitInfo(initInfo, "coefficient_coder.cl", "run") )
+CoefficientCoder::CoefficientCoder(KernelInitInfoBase initInfo) : GenericKernel( KernelInitInfo(initInfo, "coefficient_coder.cl", "g_decode") )
 {
 }
 

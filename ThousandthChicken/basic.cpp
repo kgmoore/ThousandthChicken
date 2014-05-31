@@ -98,7 +98,9 @@ void* aligned_malloc (size_t size, size_t alignment)
     }
 
     assert(size >= sizeof(void*));
-    assert(size/sizeof(void*)*sizeof(void*) == size);
+
+	//why is this necessary??
+    //assert(size/sizeof(void*)*sizeof(void*) == size);
 
     // allocate extra memory and convert to size_t to perform calculations
     char* orig = new char[size + alignment + sizeof(void*)];
