@@ -19,7 +19,7 @@ public:
 private:
 	type_subband* dequantization(type_subband *sb, void* coefficients);
 	int get_exp_subband_gain(int orient);
-	//GenericKernel executableLossy;
+	GenericKernel lossyKernel;
 
 };
 

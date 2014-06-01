@@ -5,7 +5,8 @@
 
 
 Quantizer::Quantizer(KernelInitInfoBase initInfo)  : 
-						GenericKernel( KernelInitInfo(initInfo, "quantizer.cl", "subband_dequantization_lossless") )
+						GenericKernel( KernelInitInfo(initInfo, "quantizer.cl", "subband_dequantization_lossless") ),
+						lossyKernel( KernelInitInfo(initInfo, "quantizer.cl", "subband_dequantization_lossy")) 
 {
 }
 
@@ -106,32 +107,32 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 	cl_int2 osize = {tile_comp->width, tile_comp->height};
 	cl_int2 cblk_size = {tile_comp->cblk_w, tile_comp->cblk_h};
 
-	//OpenCLProgramOneKernel& exec = img->wavelet_type ? executableLossy : executable;
+	cl_kernel quantKernel = img->wavelet_type ? lossyKernel.getKernel() : myKernel;
 
 	/////////////////////////////////////
 	//set kernel arguments
-	err = clSetKernelArg(myKernel, 0, sizeof(cl_mem), (void *) &d_subbandCodeblockCoefficients);
+	err = clSetKernelArg(quantKernel, 0, sizeof(cl_mem), (void *) &d_subbandCodeblockCoefficients);
     SAMPLE_CHECK_ERRORS(err);
 	
-	err = clSetKernelArg(myKernel, 1, sizeof(cl_int2), (void *) &isize);
+	err = clSetKernelArg(quantKernel, 1, sizeof(cl_int2), (void *) &isize);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(myKernel, 2, sizeof(cl_mem), (void *)&tile_comp->img_data_d);
+	err = clSetKernelArg(quantKernel, 2, sizeof(cl_mem), (void *)&tile_comp->img_data_d);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(myKernel, 3, sizeof(int), (void *)&odataOffset);
+	err = clSetKernelArg(quantKernel, 3, sizeof(int), (void *)&odataOffset);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(myKernel, 4, sizeof(cl_int2), (void *) &osize);
+	err = clSetKernelArg(quantKernel, 4, sizeof(cl_int2), (void *) &osize);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(myKernel, 5, sizeof(cl_int2), (void *) &cblk_size);
+	err = clSetKernelArg(quantKernel, 5, sizeof(cl_int2), (void *) &cblk_size);
     SAMPLE_CHECK_ERRORS(err);
 
 	if (img->wavelet_type) {
-		err = clSetKernelArg(myKernel, 6, sizeof(float), (void *) &sb->convert_factor);
+		err = clSetKernelArg(quantKernel, 6, sizeof(float), (void *) &sb->convert_factor);
 	} else {
-		err = clSetKernelArg(myKernel, 6, sizeof(int), (void *) &shift_bits);
+		err = clSetKernelArg(quantKernel, 6, sizeof(int), (void *) &shift_bits);
 	}
 	 SAMPLE_CHECK_ERRORS(err);
 
@@ -140,13 +141,8 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 	size_t global_work_size[2] = {sb->num_xcblks * BLOCKSIZEX,   sb->num_ycblks * BLOCKSIZEY};
 	size_t local_work_size[2] = {BLOCKSIZEX, BLOCKSIZEY};
     // execute kernel
-	if (img->wavelet_type)
-	{
-		err = clEnqueueNDRangeKernel(queue, myKernel, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
-	} else
-	{
-		err = clEnqueueNDRangeKernel(queue, myKernel, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
-	}
+	err = clEnqueueNDRangeKernel(queue, quantKernel, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
+
     SAMPLE_CHECK_ERRORS(err);
 
 	err = clFinish(queue);

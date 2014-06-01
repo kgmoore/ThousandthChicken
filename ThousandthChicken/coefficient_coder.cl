@@ -839,7 +839,7 @@ KERNEL void g_decode(GLOBAL unsigned int *stBuffers, GLOBAL unsigned char *codes
 {
 
 	
-	size_t idx = get_global_id(0);
+	size_t idx = getGlobalId(0);
 	if(idx >= codeBlocks)
 		return;
 

@@ -6,6 +6,9 @@
 #define GLOBAL global
 
 
+size_t getGlobalId(	const uint dimindx) {
+  return get_global_id(dimindx);
+}
 size_t getGroupId(	const uint dimindx) {
   return get_group_id(dimindx);
 }

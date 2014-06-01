@@ -11,6 +11,7 @@ class GenericKernel
 public:
 	GenericKernel(KernelInitInfo initInfo);
 	virtual ~GenericKernel(void);
+	cl_kernel getKernel() { return myKernel;}
 protected:
 	int CreateAndBuildKernel(string openCLFileName, string kernelName, string buildOptions);
 

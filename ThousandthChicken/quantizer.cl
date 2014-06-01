@@ -82,5 +82,5 @@ KERNEL  void subband_dequantization_lossless(GLOBAL int *idata, int2 isize, GLOB
 		out = n + m * osize.x;
 	}
 
-	barrier(CLK_GLOBAL_MEM_FENCE);
+	localMemoryFence();
 }
