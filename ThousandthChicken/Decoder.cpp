@@ -14,13 +14,16 @@
 #include "io_buffered_stream.h"
 #include "codestream.h"
 #include "basic.h"
-#include "CoefficientCoder.h"
-#include "Quantizer.h"
 
 
 
 
-Decoder::Decoder(void)
+Decoder::Decoder(ocl_args_d_t* ocl) : _ocl(ocl),
+									coder( KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\coefficient_coder.cl\""*/"")),
+									quantizer( KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/"")),
+									dwt(KernelInitInfoBase(_ocl->commandQueue, ""))
+
+	                     
 {
 }
 
@@ -47,7 +50,7 @@ void init_dec_buffer(FILE *fsrc, type_buffer *src_buff) {
 }
 
 
-int Decoder::decode(ocl_args_d_t* ocl)
+int Decoder::decode(void)
 {
 	//	println_start(INFO);
 	type_image *img = (type_image *)malloc(sizeof(type_image));
@@ -66,10 +69,6 @@ int Decoder::decode(ocl_args_d_t* ocl)
 	type_tile *tile;
 	unsigned int i,j;
 
-	CoefficientCoder coder( KernelInitInfoBase(ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\coefficient_coder.cl\""*/""));
-	Quantizer quantizer( KernelInitInfoBase(ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/""));
-
-
 	if(strstr(img->in_file, ".jp2") != NULL) {
 		println(INFO, "It's a JP2 file");
 
@@ -87,7 +86,7 @@ int Decoder::decode(ocl_args_d_t* ocl)
 				
 				//allocate image tile component memory on device 
 				cl_int err = CL_SUCCESS;
-				tile_comp->img_data_d = (type_data*)clCreateBuffer(ocl->context, CL_MEM_READ_WRITE, tile_comp->width * tile_comp->height * sizeof(type_data), NULL, &err);
+				tile_comp->img_data_d = (type_data*)clCreateBuffer(_ocl->context, CL_MEM_READ_WRITE, tile_comp->width * tile_comp->height * sizeof(type_data), NULL, &err);
 				SAMPLE_CHECK_ERRORS(err);
 				if (tile_comp->img_data_d  == 0)
 					throw Error("Failed to create tile component Buffer!");
@@ -103,7 +102,7 @@ int Decoder::decode(ocl_args_d_t* ocl)
 			/* Dequantize data */
 			quantizer.dequantize_tile(tile);
 			/* Do inverse wavelet transform */
-			//dwt.iwt(tile);
+			dwt.iwt(tile);
 		}
 
 		if(img->use_mct == 1) {

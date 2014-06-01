@@ -74,8 +74,8 @@ int main(int argc, char* argv[])
         return error_code;
     }
 
-	Decoder decoder;
-	decoder.decode(&ocl);
+	Decoder decoder(&ocl);
+	decoder.decode();
 
 	DWTTest dwtTester;
 	dwtTester.test(&ocl);

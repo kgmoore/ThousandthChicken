@@ -135,6 +135,9 @@
     <ClCompile Include="Quantizer.cpp">
       <Filter>Quantizer</Filter>
     </ClCompile>
+    <ClCompile Include="DWT.cpp">
+      <Filter>DWT</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DWTForward53.h">
@@ -214,6 +217,9 @@
     </ClInclude>
     <ClInclude Include="Quantizer.h">
       <Filter>Quantizer</Filter>
+    </ClInclude>
+    <ClInclude Include="DWT.h">
+      <Filter>DWT</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

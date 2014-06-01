@@ -41,6 +41,7 @@
     <ClCompile Include="CoefficientCoder.cpp" />
     <ClCompile Include="config_parameters.c" />
     <ClCompile Include="Decoder.cpp" />
+    <ClCompile Include="DWT.cpp" />
     <ClCompile Include="DWTForward53.cpp" />
     <ClCompile Include="DWTForward97.cpp" />
     <ClCompile Include="DWTKernel.cpp" />
@@ -68,6 +69,7 @@
     <ClInclude Include="coefficientcoder_common.h" />
     <ClInclude Include="config_parameters.h" />
     <ClInclude Include="Decoder.h" />
+    <ClInclude Include="DWT.h" />
     <ClInclude Include="DWTForward53.h" />
     <ClInclude Include="DWTForward97.h" />
     <ClInclude Include="DWTKernel.h" />

@@ -1,13 +1,26 @@
 #pragma once
 
+#include "CoefficientCoder.h"
+#include "Quantizer.h"
+#include "DWT.h"
+
+
 struct ocl_args_d_t;
 
 class Decoder
 {
 public:
-	Decoder(void);
+	Decoder(ocl_args_d_t* ocl);
 	~Decoder(void);
 
-	int decode(ocl_args_d_t* ocl);
+	int decode();
+private:
+
+	ocl_args_d_t* _ocl;
+	CoefficientCoder coder;
+	Quantizer quantizer;
+	DWT dwt;
+
+
 };
 
