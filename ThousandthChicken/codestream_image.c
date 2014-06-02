@@ -209,12 +209,6 @@ void init_tile_comps(type_tile *tile, type_parameters *param) {
 		tile_comp->cblk_h = 1 << tile_comp->cblk_exp_h;
 		//printf("tile w:%d h:%d\n", tile_comp->width, tile_comp->height);
 		tile_comp->parent_tile = tile;
-#ifdef CUDA
-		cuda_h_allocate_mem((void **) &(tile_comp->img_data), tile_comp->width * tile_comp->height * sizeof(type_data));
-		//		tile_comp->img_data = (type_data *) malloc(tile_comp->width * tile_comp->height * sizeof(type_data));
-		cuda_d_allocate_mem((void **) &(tile_comp->img_data_d),
-				tile_comp->width * tile_comp->height * sizeof(type_data));
-#endif
 		init_resolution_lvls(tile_comp);
 	}
 }

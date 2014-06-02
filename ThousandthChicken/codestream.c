@@ -5,6 +5,8 @@
 #include "codestream_markers.h"
 #include "codestream_tag_tree_encode.h"
 #include "config_parameters.h"
+#include "codestream_image.h"
+#include "codestream_image_mct.h"
 
 
 

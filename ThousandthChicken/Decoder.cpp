@@ -86,7 +86,8 @@ int Decoder::decode(void)
 				
 				//allocate image tile component memory on device 
 				cl_int err = CL_SUCCESS;
-				tile_comp->img_data_d = (type_data*)clCreateBuffer(_ocl->context, CL_MEM_READ_WRITE, tile_comp->width * tile_comp->height * sizeof(type_data), NULL, &err);
+				int dataTypeSize = tile->parent_img->wavelet_type ? sizeof(float) : sizeof(int);
+				tile_comp->img_data_d = (void*)clCreateBuffer(_ocl->context, CL_MEM_READ_WRITE, tile_comp->width * tile_comp->height * dataTypeSize, NULL, &err);
 				SAMPLE_CHECK_ERRORS(err);
 				if (tile_comp->img_data_d  == 0)
 					throw Error("Failed to create tile component Buffer!");

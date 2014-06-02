@@ -24,6 +24,11 @@ typedef struct type_atk type_atk;
 typedef struct type_ads type_ads;
 typedef struct type_multiple_component_transformations type_multiple_component_transformations;
 
+typedef struct _type_buffer type_buffer;
+typedef struct type_image type_image;
+
+void read_multiple_component_transformations(type_buffer *buffer, type_image *img);
+
 /** Data gathering point for multiple component transformation as in 15444-2 Annex I */ 
 struct type_multiple_component_transformations
 {
@@ -225,4 +230,6 @@ struct type_atk {
 	/** The ith additive residue for lifting step, s. The index, i, ranges from i = 0 to Natk-1. Present for reversible transformations */
 	unsigned char* additive_residue;
 };
+
+
 

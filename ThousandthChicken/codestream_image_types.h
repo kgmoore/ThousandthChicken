@@ -235,11 +235,8 @@ struct type_tile_comp
 	/** Number of guard bits */
 	unsigned char num_guard_bits;
 
-	/** Tile component data in the host memory (this is page-locked memory, prepared for copying to device) */
-	type_data *img_data;
-
 	/** Tile component data on the GPU */
-	type_data *img_data_d;
+	void* img_data_d;
 
 	/** Resolution levels */
 	type_res_lvl *res_lvls;
@@ -412,7 +409,7 @@ struct type_image
 
 	/** Initial real-image data on GPU, used only in read_image and color transformation,
 	 * after tiling use pointers in tile->tile_comp.*/
-	type_data *img_data_d;
+	void* img_data_d;
 	/** Real image data is in this array of tiles. */
 	type_tile *tile;
 

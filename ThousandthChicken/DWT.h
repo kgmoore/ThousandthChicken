@@ -17,7 +17,7 @@ public:
 	 void iwt(type_tile *tile);
 
 private:
-	 type_data *iwt_2d(short filter, type_tile_comp *tile_comp);
+	tDeviceMem iwt_2d(short filter, type_tile_comp *tile_comp);
 
 
 private:
