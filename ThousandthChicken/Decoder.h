@@ -4,6 +4,7 @@
 #include "Quantizer.h"
 #include "DWT.h"
 #include "Preprocessor.h"
+#include <string>
 
 
 struct ocl_args_d_t;
@@ -14,7 +15,7 @@ public:
 	Decoder(ocl_args_d_t* ocl);
 	~Decoder(void);
 
-	int decode();
+	int decode(std::string fileName);
 private:
 
 	ocl_args_d_t* _ocl;

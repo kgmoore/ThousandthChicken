@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     }
 
 	Decoder decoder(&ocl);
-	decoder.decode();
+	decoder.decode("c:\\src\\openjpeg-data\\input\\conformance\\file1.jp2");
 
 //	DWTTest dwtTester;
 //	dwtTester.test(&ocl);

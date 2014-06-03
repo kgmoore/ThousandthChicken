@@ -6,7 +6,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "codestream_image_types.h"
 #include "config_parameters.h"
 #include "logger.h"
@@ -52,12 +51,12 @@ void init_dec_buffer(FILE *fsrc, type_buffer *src_buff) {
 }
 
 
-int Decoder::decode(void)
+int Decoder::decode(std::string fileName)
 {
 	//	println_start(INFO);
 	type_image *img = (type_image *)malloc(sizeof(type_image));
 	memset(img, 0, sizeof(type_image));
-	img->in_file = "c:\\src\\openjpeg-data\\input\\conformance\\file1.jp2";
+	img->in_file = fileName.c_str();
 	type_parameters *param = (type_parameters*)malloc(sizeof(type_parameters));
 	default_config_values(param);
 	//init_device(param);
