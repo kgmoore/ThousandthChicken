@@ -10,13 +10,25 @@
 #define PATCHX 32
 #define PATCHY 32
 
-DWT::DWT(KernelInitInfoBase initInfo) : initInfo(initInfo), f53(initInfo), r53(initInfo), f97(initInfo), r97(initInfo)
+DWT::DWT(KernelInitInfoBase initInfo) : initInfo(initInfo)
 {
+	f53 = new DWTForward53(initInfo);
+	r53 = new DWTReverse53(initInfo);
+	f97 = new DWTForward97(initInfo);
+	r97 = new DWTReverse97(initInfo);
 }
 
 
 DWT::~DWT(void)
 {
+	if (f53)
+		delete f53;
+	if (r53)
+		delete r53;
+	if (f97)
+		delete f97;
+	if (r97)
+		delete r97;
 }
 
 
@@ -63,10 +75,10 @@ tDeviceMem DWT::iwt_2d(short filter, type_tile_comp *tile_comp) {
 	switch(filter)
 	{
 		case DWT97:
-			r97.run(d_idata, d_odata, tile_comp->width, tile_comp->height, tile_comp->num_dlvls);
+			r97->run(d_idata, d_odata, tile_comp->width, tile_comp->height, tile_comp->num_dlvls);
 			break;
 		case DWT53:
-			r53.run(d_idata, d_odata, tile_comp->width, tile_comp->height, tile_comp->num_dlvls);
+			r53->run(d_idata, d_odata, tile_comp->width, tile_comp->height, tile_comp->num_dlvls);
 			break;
 	}
 

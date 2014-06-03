@@ -69,8 +69,29 @@
     <Intel_OpenCL_Build_Rules Include="coefficient_coder.cl">
       <Filter>CoefficientCoder</Filter>
     </Intel_OpenCL_Build_Rules>
-    <Intel_OpenCL_Build_Rules Include="quantizer.cl">
+    <Intel_OpenCL_Build_Rules Include="quantizer_lossless.cl">
       <Filter>Quantizer</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="quantizer_lossy.cl">
+      <Filter>Quantizer</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="preprocess_ict.cl">
+      <Filter>Preprocessor</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="preprocess_rct.cl">
+      <Filter>Preprocessor</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="preprocess_dc_level_shift.cl">
+      <Filter>Preprocessor</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="preprocess_inverse_dc_level_shift.cl">
+      <Filter>Preprocessor</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="preprocess_inverse_ict.cl">
+      <Filter>Preprocessor</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="preprocess_inverse_rct.cl">
+      <Filter>Preprocessor</Filter>
     </Intel_OpenCL_Build_Rules>
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +158,9 @@
     </ClCompile>
     <ClCompile Include="DWT.cpp">
       <Filter>DWT</Filter>
+    </ClCompile>
+    <ClCompile Include="Preprocessor.cpp">
+      <Filter>Preprocessor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -220,6 +244,9 @@
     </ClInclude>
     <ClInclude Include="DWT.h">
       <Filter>DWT</Filter>
+    </ClInclude>
+    <ClInclude Include="Preprocessor.h">
+      <Filter>Preprocessor</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

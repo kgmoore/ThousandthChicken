@@ -77,8 +77,8 @@ int main(int argc, char* argv[])
 	Decoder decoder(&ocl);
 	decoder.decode();
 
-	DWTTest dwtTester;
-	dwtTester.test(&ocl);
+//	DWTTest dwtTester;
+//	dwtTester.test(&ocl);
 
 
 

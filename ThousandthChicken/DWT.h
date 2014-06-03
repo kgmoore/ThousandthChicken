@@ -22,10 +22,10 @@ private:
 
 private:
 	KernelInitInfoBase initInfo;
-	DWTForward53 f53;
-	DWTReverse53 r53;
-	DWTForward97 f97;
-	DWTReverse97 r97;
+	DWTForward53* f53;
+	DWTReverse53* r53;
+	DWTForward97* f97;
+	DWTReverse97* r97;
 
 };
 

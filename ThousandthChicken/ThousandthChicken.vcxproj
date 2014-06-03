@@ -29,7 +29,14 @@
     <Intel_OpenCL_Build_Rules Include="dwt_r97.cl" />
     <Intel_OpenCL_Build_Rules Include="dwt_transform_buffer.cl" />
     <Intel_OpenCL_Build_Rules Include="platform.cl" />
-    <Intel_OpenCL_Build_Rules Include="quantizer.cl" />
+    <Intel_OpenCL_Build_Rules Include="preprocess_dc_level_shift.cl" />
+    <Intel_OpenCL_Build_Rules Include="preprocess_ict.cl" />
+    <Intel_OpenCL_Build_Rules Include="preprocess_inverse_dc_level_shift.cl" />
+    <Intel_OpenCL_Build_Rules Include="preprocess_rct.cl" />
+    <Intel_OpenCL_Build_Rules Include="preprocess_inverse_ict.cl" />
+    <Intel_OpenCL_Build_Rules Include="preprocess_inverse_rct.cl" />
+    <Intel_OpenCL_Build_Rules Include="quantizer_lossy.cl" />
+    <Intel_OpenCL_Build_Rules Include="quantizer_lossless.cl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="basic.cpp" />
@@ -53,6 +60,7 @@
     <ClCompile Include="logger.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ocl_util.cpp" />
+    <ClCompile Include="Preprocessor.cpp" />
     <ClCompile Include="Quantizer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -82,6 +90,7 @@
     <ClInclude Include="logger.h" />
     <ClInclude Include="ocl_util.h" />
     <ClInclude Include="platform.h" />
+    <ClInclude Include="Preprocessor.h" />
     <ClInclude Include="Quantizer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

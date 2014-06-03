@@ -9,7 +9,7 @@
 struct type_subband;
 struct type_tile;
 
-class Quantizer : 	public GenericKernel
+class Quantizer 
 {
 public:
 	Quantizer(KernelInitInfoBase initInfo);
@@ -19,7 +19,9 @@ public:
 private:
 	type_subband* dequantization(type_subband *sb, void* coefficients);
 	int get_exp_subband_gain(int orient);
-	GenericKernel lossyKernel;
+	KernelInitInfoBase initInfo;
+	GenericKernel* lossyKernel;
+	GenericKernel* losslessKernel;
 
 };
 

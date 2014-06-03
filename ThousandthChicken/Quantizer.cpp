@@ -5,14 +5,20 @@
 
 
 Quantizer::Quantizer(KernelInitInfoBase initInfo)  : 
-						GenericKernel( KernelInitInfo(initInfo, "quantizer.cl", "subband_dequantization_lossless") ),
-						lossyKernel( KernelInitInfo(initInfo, "quantizer.cl", "subband_dequantization_lossy")) 
+	                    initInfo(initInfo)
+	                   
 {
+	 losslessKernel = new GenericKernel( KernelInitInfo(initInfo, "quantizer_lossless.cl", "subband_dequantization_lossless") );
+	 lossyKernel = new GenericKernel( KernelInitInfo(initInfo, "quantizer_lossy.cl", "subband_dequantization_lossy")) ;
 }
 
 
 Quantizer::~Quantizer(void)
 {
+	if (losslessKernel)
+		delete losslessKernel;
+	if (lossyKernel)
+		delete lossyKernel;
 }
 
 
@@ -56,7 +62,7 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 	cl_context context  = NULL;
 
     // Obtaing the OpenCL context from the command-queue properties
-	err = clGetCommandQueueInfo(queue, CL_QUEUE_CONTEXT, sizeof(cl_context), &context, NULL);
+	err = clGetCommandQueueInfo(initInfo.cmd_queue, CL_QUEUE_CONTEXT, sizeof(cl_context), &context, NULL);
 	if (CL_SUCCESS != err)
 	{
 		LogError("Error: clGetCommandQueueInfo (CL_QUEUE_CONTEXT) returned %s.\n", TranslateOpenCLError(err));
@@ -85,7 +91,7 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
    // The region size must be given in bytes
 	size_t region[] = { cblk->width * sizeof(int), cblk->height * sizeof(int) };
 
-	clEnqueueCopyBufferRect ( queue, 	//copy command will be queued
+	clEnqueueCopyBufferRect ( initInfo.cmd_queue, 	//copy command will be queued
    			      (cl_mem)(d_coefficients + cblk->d_coefficientsOffset),		
    			      (cl_mem)((int*)d_subbandCodeblockCoefficients + cblk->tlx + cblk->tly * sb->width),		
 			      bufferOffset,	//offset associated with src_buffer
@@ -107,7 +113,7 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 	cl_int2 osize = {tile_comp->width, tile_comp->height};
 	cl_int2 cblk_size = {tile_comp->cblk_w, tile_comp->cblk_h};
 
-	cl_kernel quantKernel = img->wavelet_type ? lossyKernel.getKernel() : myKernel;
+	cl_kernel quantKernel = img->wavelet_type ? lossyKernel->getKernel() : losslessKernel->getKernel();
 
 	/////////////////////////////////////
 	//set kernel arguments
@@ -141,11 +147,11 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 	size_t global_work_size[2] = {sb->num_xcblks * BLOCKSIZEX,   sb->num_ycblks * BLOCKSIZEY};
 	size_t local_work_size[2] = {BLOCKSIZEX, BLOCKSIZEY};
     // execute kernel
-	err = clEnqueueNDRangeKernel(queue, quantKernel, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
+	err = clEnqueueNDRangeKernel(initInfo.cmd_queue, quantKernel, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
 
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clFinish(queue);
+	err = clFinish(initInfo.cmd_queue);
     SAMPLE_CHECK_ERRORS(err);
 
 	err = clReleaseMemObject(d_subbandCodeblockCoefficients);
