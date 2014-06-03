@@ -3,6 +3,7 @@
 #include "CoefficientCoder.h"
 #include "Quantizer.h"
 #include "DWT.h"
+#include "Preprocessor.h"
 
 
 struct ocl_args_d_t;
@@ -20,6 +21,7 @@ private:
 	CoefficientCoder coder;
 	Quantizer quantizer;
 	DWT dwt;
+	Preprocessor preprocessor;
 
 
 };

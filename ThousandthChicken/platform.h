@@ -6,7 +6,7 @@
 using namespace std;
 
 typedef cl_mem tDeviceMem;
-typedef cl_int tDeviceInt;
+typedef cl_int tDeviceRC;
 #define DeviceSuccess CL_SUCCESS
 
 struct KernelInitInfoBase {

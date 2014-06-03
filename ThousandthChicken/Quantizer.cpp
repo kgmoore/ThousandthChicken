@@ -8,8 +8,8 @@ Quantizer::Quantizer(KernelInitInfoBase initInfo)  :
 	                    initInfo(initInfo)
 	                   
 {
-	 losslessKernel = new GenericKernel( KernelInitInfo(initInfo, "quantizer_lossless.cl", "subband_dequantization_lossless") );
-	 lossyKernel = new GenericKernel( KernelInitInfo(initInfo, "quantizer_lossy.cl", "subband_dequantization_lossy")) ;
+	 losslessKernel = new GenericKernel( KernelInitInfo(initInfo, "quantizer_lossless_inverse.cl", "subband_dequantization_lossless") );
+	 lossyKernel = new GenericKernel( KernelInitInfo(initInfo, "quantizer_lossy_inverse.cl", "subband_dequantization_lossy")) ;
 }
 
 

@@ -21,7 +21,9 @@
 Decoder::Decoder(ocl_args_d_t* ocl) : _ocl(ocl),
 									coder( KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\coefficient_coder.cl\""*/"")),
 									quantizer( KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/"")),
-									dwt(KernelInitInfoBase(_ocl->commandQueue, ""))
+									dwt(KernelInitInfoBase(_ocl->commandQueue, "")),
+									preprocessor(KernelInitInfoBase(_ocl->commandQueue, ""))
+
 
 	                     
 {
@@ -109,17 +111,17 @@ int Decoder::decode(void)
 		if(img->use_mct == 1) {
 			// lossless decoder
 			if(img->wavelet_type == 0) {
-				//preprocessor.color_decoder_lossless(img);
+				preprocessor.color_decoder_lossless(img);
 			}
 			else { //lossy decoder
-				//preprocessor.color_decoder_lossy(img);
+				preprocessor.color_decoder_lossy(img);
 			}
 		} else if (img->use_part2_mct == 1) {
 			//klt.decode_klt(img);
 			//part 2 not supported
 		} else {
 			if(img->sign == UNSIGNED) {
-				//preprocessor.idc_level_shifting(img);
+				preprocessor.idc_level_shifting(img);
 			}
 		}
 	}
@@ -141,23 +143,23 @@ int Decoder::decode(void)
 			/* Dequantize data */
 			quantizer.dequantize_tile(tile);
 			/* Do inverse wavelet transform */
-			//dwt.iwt(tile);
+			dwt.iwt(tile);
 		}
 
 		if(img->use_mct == 1) {
 			// lossless decoder
 			if(img->wavelet_type == 0) {
-				//preprocessor.color_decoder_lossless(img);
+				preprocessor.color_decoder_lossless(img);
 			}
 			else {  //lossy decoder
-				//preprocessor.color_decoder_lossy(img);
+				preprocessor.color_decoder_lossy(img);
 			}
 		} else if (img->use_part2_mct == 1) {
 			//klt.decode_klt(img);
 			//part 2 not supported
 		} else {
 			if(img->sign == UNSIGNED) {
-				///preprocessor.idc_level_shifting(img);
+				preprocessor.idc_level_shifting(img);
 			}
 		}
 	}

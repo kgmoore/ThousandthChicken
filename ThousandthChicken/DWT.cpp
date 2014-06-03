@@ -50,9 +50,10 @@ tDeviceMem DWT::iwt_2d(short filter, type_tile_comp *tile_comp) {
 	tDeviceMem  d_idata = (tDeviceMem)tile_comp->img_data_d;
 	/* Result data */
 
+	int dataSize = tile_comp->parent_tile->parent_img->wavelet_type ? sizeof(type_data) : sizeof(int);
+
 	/* Image data size */
-	const unsigned int smem_size = 
-		(tile_comp->parent_tile->parent_img->wavelet_type ? sizeof(type_data) : sizeof(int) ) * tile_comp->width * tile_comp->height;
+	const unsigned int smem_size = dataSize * tile_comp->width * tile_comp->height;
 	
     cl_int err = CL_SUCCESS;
 	cl_context context  = NULL;
@@ -71,7 +72,7 @@ tDeviceMem DWT::iwt_2d(short filter, type_tile_comp *tile_comp) {
     if (d_odata == (cl_mem)0)
         throw Error("Failed to create d_odata Buffer!");
 	cl_int pattern = 0;
-	clEnqueueFillBuffer(initInfo.cmd_queue, d_odata, &pattern, sizeof(type_data), 0, smem_size, 0, NULL, NULL);
+	clEnqueueFillBuffer(initInfo.cmd_queue, d_odata, &pattern, dataSize, 0, smem_size, 0, NULL, NULL);
 	switch(filter)
 	{
 		case DWT97:
@@ -84,7 +85,7 @@ tDeviceMem DWT::iwt_2d(short filter, type_tile_comp *tile_comp) {
 
 	err = clReleaseMemObject((cl_mem)d_idata);
     SAMPLE_CHECK_ERRORS(err);
-	tile_comp->img_data_d = NULL;
+	tile_comp->img_data_d = d_odata;
 	return d_odata;
 }
 
@@ -95,16 +96,14 @@ void DWT::iwt(type_tile *tile)
 	type_tile_comp *tile_comp;
 	type_image *img = tile->parent_img;
 
-//	save_img(img, "dec_dwt_before.bmp");
-
 	/* Process components from tile */
 	for(i = 0; i < tile->parent_img->num_components; i++)
 	{
 		tile_comp = &(tile->tile_comp[i]);
-		tile_comp->img_data_d = iwt_2d(img->wavelet_type ? DWT97 : DWT53, tile_comp);
-
+		// error condition if null
+		if (!iwt_2d(img->wavelet_type ? DWT97 : DWT53, tile_comp))
+			return;
 	}
-//	save_img(img, "dec_dwt_after.bmp");
 //	println_end(INFO);
 }
 

@@ -32,7 +32,7 @@ DWTForward97::~DWTForward97(void)
       const int llSizeX = divRndUp(sizeX, 2);
       const int llSizeY = divRndUp(sizeY, 2);
 	  
-	  tDeviceInt err = copyLLBandToSrc(llSizeX, llSizeY);
+	  tDeviceRC err = copyLLBandToSrc(llSizeX, llSizeY);
 	  if (err != DeviceSuccess)
 		  return;  
       

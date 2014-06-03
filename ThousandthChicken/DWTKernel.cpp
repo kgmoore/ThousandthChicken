@@ -123,7 +123,7 @@ template <typename T>  void DWTKernel<T>::launchKernel (int WIN_SX, int WIN_SY, 
 	GenericKernel::launchKernel(global_work_size, local_work_size);
   }
 
-template <typename T> tDeviceInt DWTKernel<T>::copyLLBandToSrc(int LLSizeX, int LLSizeY){
+template <typename T> tDeviceRC DWTKernel<T>::copyLLBandToSrc(int LLSizeX, int LLSizeY){
 	  // copy forward or reverse transformed LL band from output back into the input
 	size_t bufferOffset[] = { 0, 0, 0};
 	cl_int err = CL_SUCCESS;

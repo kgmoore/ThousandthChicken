@@ -69,12 +69,6 @@
     <Intel_OpenCL_Build_Rules Include="coefficient_coder.cl">
       <Filter>CoefficientCoder</Filter>
     </Intel_OpenCL_Build_Rules>
-    <Intel_OpenCL_Build_Rules Include="quantizer_lossless.cl">
-      <Filter>Quantizer</Filter>
-    </Intel_OpenCL_Build_Rules>
-    <Intel_OpenCL_Build_Rules Include="quantizer_lossy.cl">
-      <Filter>Quantizer</Filter>
-    </Intel_OpenCL_Build_Rules>
     <Intel_OpenCL_Build_Rules Include="preprocess_ict.cl">
       <Filter>Preprocessor</Filter>
     </Intel_OpenCL_Build_Rules>
@@ -84,13 +78,22 @@
     <Intel_OpenCL_Build_Rules Include="preprocess_dc_level_shift.cl">
       <Filter>Preprocessor</Filter>
     </Intel_OpenCL_Build_Rules>
-    <Intel_OpenCL_Build_Rules Include="preprocess_inverse_dc_level_shift.cl">
+    <Intel_OpenCL_Build_Rules Include="quantizer_lossless_inverse.cl">
+      <Filter>Quantizer</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="quantizer_lossy_inverse.cl">
+      <Filter>Quantizer</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="preprocess_dc_level_shift_inverse.cl">
       <Filter>Preprocessor</Filter>
     </Intel_OpenCL_Build_Rules>
-    <Intel_OpenCL_Build_Rules Include="preprocess_inverse_ict.cl">
+    <Intel_OpenCL_Build_Rules Include="preprocess_ict_inverse.cl">
       <Filter>Preprocessor</Filter>
     </Intel_OpenCL_Build_Rules>
-    <Intel_OpenCL_Build_Rules Include="preprocess_inverse_rct.cl">
+    <Intel_OpenCL_Build_Rules Include="preprocess_rct_inverse.cl">
+      <Filter>Preprocessor</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="preprocess_constants.cl">
       <Filter>Preprocessor</Filter>
     </Intel_OpenCL_Build_Rules>
   </ItemGroup>
@@ -246,6 +249,9 @@
       <Filter>DWT</Filter>
     </ClInclude>
     <ClInclude Include="Preprocessor.h">
+      <Filter>Preprocessor</Filter>
+    </ClInclude>
+    <ClInclude Include="preprocess_constants.h">
       <Filter>Preprocessor</Filter>
     </ClInclude>
   </ItemGroup>

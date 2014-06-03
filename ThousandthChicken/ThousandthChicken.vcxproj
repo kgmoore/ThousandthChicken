@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <Intel_OpenCL_Build_Rules Include="coefficient_coder.cl" />
+    <Intel_OpenCL_Build_Rules Include="preprocess_constants.cl" />
     <Intel_OpenCL_Build_Rules Include="dwt.cl" />
     <Intel_OpenCL_Build_Rules Include="dwt_common.cl" />
     <Intel_OpenCL_Build_Rules Include="dwt_f53.cl" />
@@ -31,12 +32,12 @@
     <Intel_OpenCL_Build_Rules Include="platform.cl" />
     <Intel_OpenCL_Build_Rules Include="preprocess_dc_level_shift.cl" />
     <Intel_OpenCL_Build_Rules Include="preprocess_ict.cl" />
-    <Intel_OpenCL_Build_Rules Include="preprocess_inverse_dc_level_shift.cl" />
+    <Intel_OpenCL_Build_Rules Include="preprocess_dc_level_shift_inverse.cl" />
     <Intel_OpenCL_Build_Rules Include="preprocess_rct.cl" />
-    <Intel_OpenCL_Build_Rules Include="preprocess_inverse_ict.cl" />
-    <Intel_OpenCL_Build_Rules Include="preprocess_inverse_rct.cl" />
-    <Intel_OpenCL_Build_Rules Include="quantizer_lossy.cl" />
-    <Intel_OpenCL_Build_Rules Include="quantizer_lossless.cl" />
+    <Intel_OpenCL_Build_Rules Include="preprocess_ict_inverse.cl" />
+    <Intel_OpenCL_Build_Rules Include="preprocess_rct_inverse.cl" />
+    <Intel_OpenCL_Build_Rules Include="quantizer_lossy_inverse.cl" />
+    <Intel_OpenCL_Build_Rules Include="quantizer_lossless_inverse.cl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="basic.cpp" />
@@ -91,6 +92,7 @@
     <ClInclude Include="ocl_util.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="Preprocessor.h" />
+    <ClInclude Include="preprocess_constants.h" />
     <ClInclude Include="Quantizer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

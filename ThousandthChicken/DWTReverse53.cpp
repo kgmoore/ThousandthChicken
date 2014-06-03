@@ -26,7 +26,7 @@ DWTReverse53::~DWTReverse53(void)
       const int llSizeY = divRndUp(sizeY, 2);
       dwt( llSizeX, llSizeY, levels - 1);
 
-	  tDeviceInt err = copyLLBandToSrc(llSizeX, llSizeY);
+	  tDeviceRC err = copyLLBandToSrc(llSizeX, llSizeY);
 	  if (err != DeviceSuccess)
 		  return;
     }
