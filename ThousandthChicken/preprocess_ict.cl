@@ -17,46 +17,24 @@ typedef float type_data;
  * @param img_b 1D array with BLUE component of the image.
  * @param size Number of pixels in each component (width x height).
  */
-void KERNEL ict_kernel(GLOBAL type_data *img_r, GLOBAL type_data *img_g, GLOBAL type_data *img_b, const unsigned short width, const unsigned short height, const int level_shift) {
+void KERNEL ict_kernel(GLOBAL int *img_r, GLOBAL int *img_g, GLOBAL int *img_b, const unsigned short width, const unsigned short height, const int level_shift) {
 
-	int i = getLocalId(0);
-	int j = getLocalId(1);
-	int n = i + getGroupId(0) * TILE_SIZEX;
-	int m = j + getGroupId(1) * TILE_SIZEY;
-	int idx = n + m * width;
-	type_data r, g, b;
-	type_data y, u, v;
+    int dcShift = 1 << level_shift;
+	int index = getGlobalId(0);
+	if (index >= width*height)
+	    return;
+    
+	int r = img_r[index] - dcShift;
+	int g = img_g[index] - dcShift;
+	int b = img_b[index] - dcShift;
 
-	while(j < TILE_SIZEY && m < height)
-	{
-		while(i < TILE_SIZEX && n < width)
-		{
-			b = img_r[idx] - (1 << level_shift);
-			g = img_g[idx] - (1 << level_shift);
-			r = img_b[idx] - (1 << level_shift);
+	float y = Wr*r + Wg*g + Wb*b;
+	float u = -0.16875f * r - 0.33126f * g + 0.5f * b;
+	float v = 0.5f * r - 0.41869f * g - 0.08131f * b;
 
-			y = Wr*r + Wg*g + Wb*b;
-			u = -0.16875f * r - 0.33126f * g + 0.5f * b;
-//			u = (Umax * ((b - y) / (1 - Wb)));
-			v = 0.5f * r - 0.41869f * g - 0.08131f * b;
-//			v = (Vmax * ((r - y) / (1 - Wr)));
+	img_r[index] = convert_int_sat_rte(y);
+    img_g[index] = convert_int_sat_rte(u);
+    img_b[index] = convert_int_sat_rte(v);
 
-			img_r[idx] = y;
-			img_g[idx] = u;
-			img_b[idx] = v;
-
-/*			img_r[idx] = y;
-			img_g[idx] = u;
-			img_b[idx] = v;*/
-
-			i += BLOCK_SIZE;
-			n = i + getGroupId(0) * TILE_SIZEX;
-			idx = n + m * width;
-		}
-		i = getLocalId(0);
-		j += BLOCK_SIZE;
-		n = i + getGroupId(0) * TILE_SIZEX;
-		m = j + getGroupId(1) * TILE_SIZEY;
-		idx = n + m * width;
-	}
+	
 }

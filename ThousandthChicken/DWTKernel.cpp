@@ -117,10 +117,10 @@ template <typename T>  void DWTKernel<T>::launchKernel (int WIN_SX, int WIN_SY, 
 		return;
 	}
 
-    size_t global_work_size[2] = {divRndUp(sx, WIN_SX) * WIN_SX, divRndUp(sy, WIN_SY * steps)};
-	size_t local_work_size[2] = {WIN_SX,1};
+    size_t global_work_size[3] = {divRndUp(sx, WIN_SX) * WIN_SX, divRndUp(sy, WIN_SY * steps),1};
+	size_t local_work_size[3] = {WIN_SX,1,1};
 
-	GenericKernel::launchKernel(global_work_size, local_work_size);
+	GenericKernel::launchKernel(2,global_work_size, local_work_size);
   }
 
 template <typename T> tDeviceRC DWTKernel<T>::copyLLBandToSrc(int LLSizeX, int LLSizeY){

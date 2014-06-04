@@ -33,8 +33,6 @@ void CoefficientCoder::decode_tile(type_tile *tile)
 {
 //	println_start(INFO);
 
-//	start_measure();
-
 	std::list<type_codeblock *> cblks;
 	extract_cblks(tile, cblks);
 
@@ -54,8 +52,6 @@ void CoefficientCoder::decode_tile(type_tile *tile)
 
 	printf("kernel consumption: %f\n", t);
 	free(tasks);
-
-//	stop_measure(INFO);
 
 //	println_end(INFO);
 }
@@ -174,7 +170,7 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 		coefficientsOffset +=  infos[i].nominalWidth * infos[i].nominalHeight;
 
 	    //copy each code block codeStream buffer to host memory block
-		memcpy(infos[i].codeStream, (void *) (h_codestreamBuffers + i * maxOutLength), sizeof(unsigned char) * infos[i].length);
+		memcpy((void *) (h_codestreamBuffers + i * maxOutLength), infos[i].codeStream, sizeof(unsigned char) * infos[i].length);
 
 		magconOffset += h_infos[i].width * (h_infos[i].stripeNo + 2);
 	}
@@ -238,12 +234,10 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 	size_t global_work_size[1] = {groups * THREADS};
 	size_t local_work_size[1] = {THREADS};
     // execute kernel
-	err = clEnqueueNDRangeKernel(queue, myKernel, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
+	err =  launchKernel(1, global_work_size, local_work_size); 
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clFinish(queue);
-    SAMPLE_CHECK_ERRORS(err);
-    QueryPerformanceCounter(&perf_stop);
+	QueryPerformanceCounter(&perf_stop);
 
 	/*
 	//////////////////////////////

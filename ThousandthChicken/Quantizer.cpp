@@ -31,7 +31,7 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 	float convert_factor;
 	int shift_bits;
 	int max_res_lvl;
-	int i;
+	unsigned int i;
 
 	/* Lossy */
 	if (img->wavelet_type)
@@ -75,7 +75,7 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
     if (d_subbandCodeblockCoefficients == (cl_mem)0)
         throw Error("Failed to create d_decodedCoefficientsBuffers Buffer!");
 
-	//		printf("%d %d %d\n", sb->num_cblks, tile_comp->cblk_w, tile_comp->cblk_h);
+	//printf("%d %d %d\n", sb->num_cblks, tile_comp->cblk_w, tile_comp->cblk_h);
 
 	int* d_coefficients = (int*)coefficients;
 	// fill subband coefficients buffer
@@ -84,26 +84,26 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 
 		type_codeblock *cblk = &(sb->cblks[i]);
 
-	//		printf("%d %d %d %d %d %d %d\n", cblk->tlx, cblk->tly, cblk->width, cblk->height, sb->width, sb->height, cblk->tlx + cblk->tly * sb->width);
+		//printf("%d %d %d %d %d %d %d\n", cblk->tlx, cblk->tly, cblk->width, cblk->height, sb->width, sb->height, cblk->tlx + cblk->tly * sb->width);
 
-   // copy decoded coefficients from code block device memory to sub band code block device memory
-	size_t bufferOffset[] = { 0, 0};
-   // The region size must be given in bytes
-	size_t region[] = { cblk->width * sizeof(int), cblk->height * sizeof(int) };
+	    // copy decoded coefficients from code block device memory to sub band code block device memory
+		size_t bufferOffset[] = { 0, 0};
+	   // The region size must be given in bytes
+		size_t region[] = { cblk->width * sizeof(int), cblk->height * sizeof(int) };
 
-	clEnqueueCopyBufferRect ( initInfo.cmd_queue, 	//copy command will be queued
-   			      (cl_mem)(d_coefficients + cblk->d_coefficientsOffset),		
-   			      (cl_mem)((int*)d_subbandCodeblockCoefficients + cblk->tlx + cblk->tly * sb->width),		
-			      bufferOffset,	//offset associated with src_buffer
-			      bufferOffset,     //offset associated with src_buffer
-			      region,		//(width, height, depth) in bytes of the 2D or 3D rectangle being copied
-			      tile_comp->cblk_w * sizeof(int),   //length of each row in bytes
-			      0, //length of each 2D slice in bytes 
-			      sb->width * sizeof(int),   //length of each row in bytes
-			      0, //length of each 2D slice in bytes
-			      0,
-			      NULL,
-			      NULL);
+		clEnqueueCopyBufferRect ( initInfo.cmd_queue, 	//copy command will be queued
+   					  (cl_mem)(d_coefficients + cblk->d_coefficientsOffset),		
+   					  (cl_mem)((int*)d_subbandCodeblockCoefficients + cblk->tlx + cblk->tly * sb->width),		
+					  bufferOffset,	//offset associated with src_buffer
+					  bufferOffset,     //offset associated with src_buffer
+					  region,		//(width, height, depth) in bytes of the 2D or 3D rectangle being copied
+					  tile_comp->cblk_w * sizeof(int),   //length of each row in bytes
+					  0, //length of each 2D slice in bytes 
+					  sb->width * sizeof(int),   //length of each row in bytes
+					  0, //length of each 2D slice in bytes
+					  0,
+					  NULL,
+					  NULL);
 				  
 	}
 
@@ -113,7 +113,8 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 	cl_int2 osize = {tile_comp->width, tile_comp->height};
 	cl_int2 cblk_size = {tile_comp->cblk_w, tile_comp->cblk_h};
 
-	cl_kernel quantKernel = img->wavelet_type ? lossyKernel->getKernel() : losslessKernel->getKernel();
+	GenericKernel* quant = img->wavelet_type ? lossyKernel : losslessKernel;
+	cl_kernel quantKernel =  quant->getKernel();
 
 	/////////////////////////////////////
 	//set kernel arguments
@@ -144,14 +145,10 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 
 	/////////////////////////////////////////////////////////////////////////////////
 
-	size_t global_work_size[2] = {sb->num_xcblks * BLOCKSIZEX,   sb->num_ycblks * BLOCKSIZEY};
-	size_t local_work_size[2] = {BLOCKSIZEX, BLOCKSIZEY};
+	size_t global_work_size[3] = {sb->num_xcblks * BLOCKSIZEX,   sb->num_ycblks * BLOCKSIZEY,1};
+	size_t local_work_size[3] = {BLOCKSIZEX, BLOCKSIZEY,1};
     // execute kernel
-	err = clEnqueueNDRangeKernel(initInfo.cmd_queue, quantKernel, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
-
-    SAMPLE_CHECK_ERRORS(err);
-
-	err = clFinish(initInfo.cmd_queue);
+	quant->launchKernel(2,global_work_size, local_work_size);
     SAMPLE_CHECK_ERRORS(err);
 
 	err = clReleaseMemObject(d_subbandCodeblockCoefficients);
@@ -167,8 +164,6 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 void Quantizer::dequantize_tile(type_tile *tile)
 {
 	//	println_start(INFO);
-
-	//	start_measure();
 
 	type_image *img = tile->parent_img;
 	type_tile_comp *tile_comp;
@@ -193,8 +188,6 @@ void Quantizer::dequantize_tile(type_tile *tile)
 	//release decoded coefficients buffer
 	cl_int err = clReleaseMemObject((cl_mem)tile->coefficients);
     SAMPLE_CHECK_ERRORS(err);
-
-	//	stop_measure(INFO);
 
 	//	println_end(INFO);
 }

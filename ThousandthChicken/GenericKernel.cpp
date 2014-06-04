@@ -9,7 +9,9 @@ using namespace cv;
 
 GenericKernel::GenericKernel(KernelInitInfo initInfo) : myKernel(0),
 									queue(initInfo.cmd_queue),
-	                                program(0)
+	                                program(0),
+									device(0),
+									context(0)
 {
 	CreateAndBuildKernel(initInfo.programName, initInfo.kernelName, initInfo.buildOptions);
 }
@@ -63,8 +65,6 @@ int GenericKernel::CreateAndBuildKernel(string openCLFileName, string kernelName
 {
     cl_int error_code;
     size_t src_size = 0;
-	cl_device_id device = NULL;
-	cl_context context  = NULL;
 
     // Obtaing the OpenCL context from the command-queue properties
 	error_code = clGetCommandQueueInfo(queue, CL_QUEUE_CONTEXT, sizeof(cl_context), &context, NULL);
@@ -145,14 +145,33 @@ Finish:
     return error_code;
 }
 
-cl_int GenericKernel::launchKernel(size_t global_work_size[2], size_t local_work_size[2]){
+/*
+cl_int GenericKernel::launchKernel(size_t global_work_size[2]){
+
+    size_t lwx[3] = {0};
+
+    // Obtains the local work-group size specified by the __attribute__((reqd_work_group_size(X, Y, Z))) qualifier
+	cl_int error_code = clGetKernelWorkGroupInfo(myKernel, device, CL_KERNEL_COMPILE_WORK_GROUP_SIZE, sizeof(lwx), lwx, NULL);
+    if (CL_SUCCESS != error_code)
+    {
+        LogError("Error: clGetKernelWorkGroupInfo (CL_KERNEL_COMPILE_WORK_GROUP_SIZE) returned %s.\n", TranslateOpenCLError(error_code));
+		return error_code;
+    }
+	size_t local_work_size[2] = {lwx[0],lwx[1]};
+	return launchKernelInternal(global_work_size, local_work_size);
+
+}
+*/
+
+
+cl_int GenericKernel::launchKernel(int dimension, size_t global_work_size[3], size_t local_work_size[3]){
 	// call kernel
 	
     // Enqueue the command to synchronously execute the kernel on the device
     // The number of dimensions to be used by the global work-items and by work-items in the work-group is 2
     // The global IDs start at offset (0, 0)
     // The command should be executed immediately (without conditions)
-    cl_int error_code = clEnqueueNDRangeKernel(queue, myKernel, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL);
+    cl_int error_code = clEnqueueNDRangeKernel(queue, myKernel, dimension, NULL, global_work_size, local_work_size, 0, NULL, NULL);
     if (CL_SUCCESS != error_code)
     {
         LogError("Error: clEnqueueNDRangeKernel returned %s.\n", TranslateOpenCLError(error_code));

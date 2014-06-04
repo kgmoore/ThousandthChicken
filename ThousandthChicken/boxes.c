@@ -9,6 +9,7 @@
 
 box *init_box() {
 	box *newBox = (box*)malloc(sizeof(box));
+	memset(newBox, 0, sizeof(box));
 	newBox->lbox = (unsigned char *)malloc(sizeof(char) * 5);
 	newBox->tbox = (unsigned char *)malloc(sizeof(char) * 5);
 	return newBox;
@@ -16,19 +17,10 @@ box *init_box() {
 
 //dest has to be n+1 long
 char *sstrncpy(char *dest, const char *src, size_t n) {
-	size_t i;
 	println_start(INFO);
-
-	for (i = 0; i < n; i++) {
-//		printf("i: %i\n", i);
-		dest[i] = src[i];
-	}
-
+	memcpy(dest, src, n);
 	println(INFO, "middle");
-	for (; i <= n; i++)
-		dest[n] = '\0';
-
-
+	dest[n] = '\0';
 	return dest;
 }
 
@@ -47,43 +39,34 @@ long int hex_to_long(unsigned char *hex, int length) {
 }
 
 unsigned char *read_bytes(unsigned char *dest, FILE *fd, long int n) {
-	long int i;
-	for(i = 0; i< n; i++) {
-		int tmp = fgetc(fd);
-
-		if(tmp == EOF) {
-			println(INFO, "EOF");
-			return NULL;
-		}
-
-		dest[i] = (unsigned char)tmp;
+	size_t bytesRead = 0;
+	size_t bytesRemaining = n;
+	unsigned char* target = dest;
+	while ( bytesRemaining > 0 && (bytesRead = fread(target, 1, bytesRemaining, fd)) != 0 )
+	{
+		bytesRemaining -= bytesRead;
+		target += bytesRead;
 	}
-
-	dest[i] = '\0';
+	if (bytesRemaining != 0)
+		return NULL;
+	dest[n] = '\0';
 	return (unsigned char *)dest;
 }
 
 
-//box *get_next_box(unsigned char *mem, long int *pos) {
 box *get_next_box(FILE *fd) {
 	int read = 0;
 	box* box;
 	println_start(INFO);
-	//box *box = malloc(sizeof(box));
-
-
 	box = init_box();
-
 	if( (box->lbox = read_bytes(box->lbox, fd, 4)) == NULL)
 		return NULL;
-
 	box->length = hex_to_long(box->lbox, 4);
 	if(box->length == 0) {
 		return NULL;
 	}
-
 	if( (box->tbox = read_bytes(box->tbox, fd, 4)) == NULL) {
-		println(INFO, "Corrupted JP2 file. Exitting.");
+		println(INFO, "Corrupted JP2 file. Exiting.");
 		return NULL;
 	}
 	read = 8;
@@ -114,12 +97,14 @@ box *get_next_box_char(box *superbox) {
 
 	read = superbox->read;
 	nextBox->lbox = (unsigned char*)malloc(5 * sizeof(char));
-	nextBox->lbox = (unsigned char*)sstrncpy((char*)nextBox->lbox, &content[read], 4); read += 4;
+	nextBox->lbox = (unsigned char*)sstrncpy((char*)nextBox->lbox, &content[read], 4);
+	read += 4;
 	nextBox->length = hex_to_long(nextBox->lbox, 4);
 
 	println_var(INFO, "lbox: %i", nextBox->length);
 	nextBox->tbox = (unsigned char*)malloc(5 * sizeof(char));
-	nextBox->tbox =  (unsigned char*)sstrncpy((char*)nextBox->tbox, &content[read], 4); read += 4;
+	nextBox->tbox =  (unsigned char*)sstrncpy((char*)nextBox->tbox, &content[read], 4);
+	read += 4;
 
 	println(INFO, "tbox");
 	//box->length = hex_to_long(box->lbox, 4);
@@ -144,34 +129,31 @@ box *get_next_box_char(box *superbox) {
 }
 
 int dispose_of(box *b) {
-/*	println_start(INFO);
+	if (!b)
+		return -1;
+	println_start(INFO);
 	if(b->lbox == NULL)
 		printf("NULL!\n");
 	else
 		free(b->lbox);
 	println(INFO, "A");
 
-	free(b->tbox);
-	println(INFO, "A");
-	free(b->dbox);
-
-	println(INFO, "A");
-	if(b->xlbox != NULL)
+	if (b->tbox)
+	   free(b->tbox);
+	if (b->dbox)
+	   free(b->dbox);
+	if(b->xlbox)
 		free(b->xlbox);
-
-	println(INFO, "A");
-*/
 	free(b);
-	println_end(INFO);
 	return 0;
 }
 
 int h_filetype_box(box *b, type_image *img) {
-	char *minv;
-	char *cl;
-	char *br = (char*)malloc(5 * sizeof(char));
+	char minv[5];
+	char cl[5];
+	char br[5];
 	int left,i;
-	br = sstrncpy(br, (const char*)b->dbox, 4);
+	sstrncpy(br, (const char*)b->dbox, 4);
 
 	if(strcmp(br, "jp2\040")) {
 		println(INFO, "DOSEN'T Conform to IS 15444-1. Exiting");
@@ -179,8 +161,7 @@ int h_filetype_box(box *b, type_image *img) {
 	} else
 		println(INFO, "Conforms to IS 15444-1");
 
-	minv = (char*)malloc(5 * sizeof(char));
-	minv = sstrncpy(minv, (const char*)&(b->dbox[4]), 4);
+	sstrncpy(minv, (const char*)&(b->dbox[4]), 4);
 
 	if(hex_to_long( (unsigned char*)minv, 4) != 0) {
 		println(INFO, "MinV should be 0");
@@ -191,8 +172,9 @@ int h_filetype_box(box *b, type_image *img) {
 	printf("left: %i\n", left);
 	i = 1;
 	while(left) {
-		cl = (char*)malloc(5 * sizeof(char));
-		cl = sstrncpy(cl, (const char*)&(b->dbox)[4 + i*4], 4); left -= 4; i++;
+		sstrncpy(cl, (const char*)&(b->dbox)[4 + i*4], 4); 
+		left -= 4;
+		i++;
 
 		//TODO: filetype box: codestream profile restrictions
 		if(!strcmp(cl, "J2P0")) {
@@ -210,17 +192,15 @@ int h_filetype_box(box *b, type_image *img) {
 }
 
 int h_image_header_box(box *b, type_image *img) {
-	char *cwidth, *cnum_comp;
-	char *cheight = (char*)malloc(5 * sizeof(char));
-	cheight = sstrncpy(cheight, (const char*)b->dbox, 4);
+	char cwidth[5], cheight[5], cnum_comp[3];
+
+	sstrncpy(cheight, (const char*)b->dbox, 4);
 	img->height = hex_to_long((unsigned char*)cheight, 4);
 
-	cwidth = (char*)malloc(5 * sizeof(char));
-	cwidth = sstrncpy(cwidth, (const char*)&(b->dbox)[4], 4);
+	sstrncpy(cwidth, (const char*)&(b->dbox)[4], 4);
 	img->width = (unsigned short)hex_to_long((unsigned char*)cwidth, 4);
 
-	cnum_comp = (char*)malloc(3 * sizeof(char));
-	cnum_comp = sstrncpy(cnum_comp, (const char*)&(b->dbox)[8], 2);
+	sstrncpy(cnum_comp, (const char*)&(b->dbox)[8], 2);
 	img->num_components = (unsigned short)hex_to_long((unsigned char*)cnum_comp, 2);
 
 	//TODO: bpc
@@ -230,7 +210,7 @@ int h_image_header_box(box *b, type_image *img) {
 	}
 
 	if(b->dbox[12] ==  0) {
-		println(INFO, "Colorspace know. Specified in Colorspace box");
+		println(INFO, "Colorspace known. Specified in Colorspace box");
 	} else
 	if(b->dbox[12] == 1) {
 		println(INFO, "Colorspace UNKNOWN.");
@@ -278,11 +258,7 @@ void h_contiguous_codestream_box(box *cbox, type_image *img) {
 	type_buffer *src_buff = (type_buffer *) malloc(sizeof(type_buffer));
 	src_buff->data = (unsigned char *) malloc(codestream_len+1);
 	src_buff->size = codestream_len;
-
 	src_buff->data = cbox->dbox;
-
-	//src_buff->data = sstrncpy(src_buff->data, cbox->dbox, codestream_len);
-
 	src_buff->start = src_buff->data;
 	src_buff->end = src_buff->data + src_buff->size;
 	src_buff->bp = src_buff->data;
@@ -297,7 +273,7 @@ void h_contiguous_codestream_box(box *cbox, type_image *img) {
 
 int jp2_parse_boxes(FILE *fd, type_image *img) {
 	box *sig = get_next_box(fd);
-	box* ft, *b;
+	box *ft=NULL, *b=NULL;
 
 	if(hex_to_long(sig->tbox, 4) != JP2_SIGNATURE_BOX)
 		println(INFO, "JP2 signature box should be very first box in the file: Header");
@@ -305,9 +281,9 @@ int jp2_parse_boxes(FILE *fd, type_image *img) {
 	if(hex_to_long(sig->dbox, 4) != JP2_SIG_BOX_CONTENT)
 		println(INFO, "JP2 signature box should be very first box in the file: Content");
 
-	//dispose_of(sig);
-	//free(sig);
-
+	if (sig)
+	  dispose_of(sig);
+	sig = NULL;
 	ft = get_next_box(fd);
 
 	if(hex_to_long(ft->tbox, 4) != JP2_FILETYPE_BOX)
@@ -315,6 +291,9 @@ int jp2_parse_boxes(FILE *fd, type_image *img) {
 
 	if(h_filetype_box(ft, img))
 		return 1;
+	if (ft)
+	   dispose_of(ft);
+	ft = NULL;
 
 	while( (b = get_next_box(fd)) != NULL ) {
 		if(hex_to_long(b->tbox, 4) == JP2_HEADER_BOX) {
@@ -329,8 +308,9 @@ int jp2_parse_boxes(FILE *fd, type_image *img) {
 		if(hex_to_long(b->tbox,4) ==  INTELLECTUAL_PROPERTY_BOX) {
 			println(INFO, "Intellectual Property Box");
 		}
+		dispose_of(b);
 	}
-
+	b = NULL;
 	println_end(INFO);
 	return 0;
 }

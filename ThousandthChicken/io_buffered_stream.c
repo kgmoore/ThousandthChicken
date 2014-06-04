@@ -263,8 +263,6 @@ void write_bits(type_buffer *buffer, int bits, int n)
 
 void write_array(type_buffer *buffer, unsigned char *in, int length)
 {
-	int i;
-
 	if(buffer->bits_count != 0)
 	{
 		println_var(INFO, "ERROR! bits_count sholud be equal 0");

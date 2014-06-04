@@ -14,7 +14,6 @@ class Decoder
 public:
 	Decoder(ocl_args_d_t* ocl);
 	~Decoder(void);
-
 	int decode(std::string fileName);
 private:
 

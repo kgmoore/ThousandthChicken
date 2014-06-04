@@ -14,13 +14,6 @@ void println(const char* file, const char* function, const int line, const char 
 void println_start(const char* file, const char* function, const int line);
 void println_end(const char* file, const char* function, const int line);
 void println_var(const char* file, const char* function, const int line, const char* format, ...);
-//void start_measure();
-long int start_measure();
-long int stop_measure(long int start);
-//long int stop_measure(const char* file, const char* function, const int line);
-long int stop_measure_msg(const char* file, const char* function, const int line, char *msg);
-long int stop_measure_no_info();
-
 
 #ifdef __cplusplus
 }

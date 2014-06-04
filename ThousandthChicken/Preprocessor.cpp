@@ -54,6 +54,7 @@ int Preprocessor::color_trans_gpu(type_image *img, color_trans_type type) {
 	int min = img->sign == SIGNED ? -(1 << (img->num_range_bits - 1)) : 0;
 	int max = img->sign == SIGNED ? (1 << (img->num_range_bits - 1)) - 1 : (1 << img->num_range_bits) - 1;
 
+	// http://www.jpeg.org/.demo/FAQJpeg2k/functionalities.htm#What is the RCT?
 	switch(type) {
 	case RCT:
 ///		println_var(INFO, "start: RCT");
@@ -64,10 +65,9 @@ int Preprocessor::color_trans_gpu(type_image *img, color_trans_type type) {
 			int* comp_c = (int*)(&(tile->tile_comp[2]))->img_data_d;
 			setColourTransformKernelArgs<int>(rct, comp_a, comp_b, comp_c, tile->width, tile->height, level_shift);
 
-			size_t local_work_size[2] = {BLOCK_SIZE, BLOCK_SIZE};
-			size_t global_work_size[2] = {((tile->width + (TILE_SIZEX - 1))/TILE_SIZEX, (tile->height + (TILE_SIZEY - 1))/TILE_SIZEY) * local_work_size[0], 
-				                          ((tile->height + (TILE_SIZEY - 1))/TILE_SIZEY) * local_work_size[1]};
-			rct->launchKernel(global_work_size, local_work_size);
+			size_t local_work_size[3] = {64,1,1};
+			size_t global_work_size[3] = {tile->width * tile->height, 1,1};
+			rct->launchKernel(1,global_work_size, local_work_size);
 
 		}
 		break;
@@ -81,11 +81,10 @@ int Preprocessor::color_trans_gpu(type_image *img, color_trans_type type) {
 				int* comp_c = (int*)(&(tile->tile_comp[2]))->img_data_d;
 				setColourTransformInverseKernelArgs<int>(rctInverse, comp_a, comp_b, comp_c, tile->width, tile->height, level_shift, min, max);
 
-				size_t local_work_size[2] = {BLOCK_SIZE, BLOCK_SIZE};
-				size_t global_work_size[2] = {((tile->width + (TILE_SIZEX - 1))/TILE_SIZEX, (tile->height + (TILE_SIZEY - 1))/TILE_SIZEY) * local_work_size[0], 
-				                          ((tile->height + (TILE_SIZEY - 1))/TILE_SIZEY) * local_work_size[1]};
+				size_t local_work_size[3] = {64,1,1};
+				size_t global_work_size[3] = {tile->width * tile->height, 1,1};
 
-				rctInverse->launchKernel(global_work_size, local_work_size);
+				rctInverse->launchKernel(1,global_work_size, local_work_size);
 			}
 		break;
 
@@ -93,19 +92,15 @@ int Preprocessor::color_trans_gpu(type_image *img, color_trans_type type) {
 //		println_var(INFO, "start: ICT");
 		for(i = 0; i < img->num_tiles; i++) {
 			tile = &(img->tile[i]);
-			void* comp_a = (&(tile->tile_comp[0]))->img_data_d;
-			void* comp_b = (&(tile->tile_comp[1]))->img_data_d;
-			void* comp_c = (&(tile->tile_comp[2]))->img_data_d;
-#ifdef CUDA
-			dim3 dimGrid((tile->width + (TILE_SIZEX - 1))/TILE_SIZEX, (tile->height + (TILE_SIZEY - 1))/TILE_SIZEY);
-			dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-			int level_shift = img->num_range_bits - 1;
-			/*int blocks = ( tile_size / (BLOCK_SIZE * BLOCK_SIZE)) + 1;
-			dim3 dimGrid(blocks);
-			dim3 dimBlock(BLOCK_SIZE* BLOCK_SIZE);*/
+			int* comp_a = (int*)(&(tile->tile_comp[0]))->img_data_d;
+			int* comp_b = (int*)(&(tile->tile_comp[1]))->img_data_d;
+			int* comp_c = (int*)(&(tile->tile_comp[2]))->img_data_d;
+			setColourTransformKernelArgs<int>(ict, comp_a, comp_b, comp_c, tile->width, tile->height, level_shift);
 
-			ict_kernel<<< dimGrid, dimBlock>>>( comp_a, comp_b, comp_c, tile->width, tile->height, level_shift );
-#endif
+			size_t local_work_size[3] = {64,1,1};
+			size_t global_work_size[3] = {tile->width * tile->height, 1,1};
+
+			ict->launchKernel(1,global_work_size, local_work_size);
 		}
 
 		break;
@@ -114,18 +109,15 @@ int Preprocessor::color_trans_gpu(type_image *img, color_trans_type type) {
 //		println_var(INFO, "start: TCI");
 		for(i = 0; i < img->num_tiles; i++) {
 			tile = &(img->tile[i]);
-			tile_size = tile->width * tile->height;
-			void* comp_a = (&(tile->tile_comp[0]))->img_data_d;
-			void* comp_b = (&(tile->tile_comp[1]))->img_data_d;
-			void* comp_c = (&(tile->tile_comp[2]))->img_data_d;
+			int* comp_a = (int*)(&(tile->tile_comp[0]))->img_data_d;
+			int* comp_b = (int*)(&(tile->tile_comp[1]))->img_data_d;
+			int* comp_c = (int*)(&(tile->tile_comp[2]))->img_data_d;
+			setColourTransformInverseKernelArgs<int>(ictInverse, comp_a, comp_b, comp_c, tile->width, tile->height, level_shift, min, max);
 
-			int blocks = ( tile_size / (BLOCK_SIZE * BLOCK_SIZE)) + 1;
-#ifdef CUDA
-			dim3 dimGrid(blocks);
-			dim3 dimBlock(BLOCK_SIZE* BLOCK_SIZE);
+			size_t local_work_size[3] = {64,1,1};
+			size_t global_work_size[3] = {tile->width * tile->height, 1,1};
 
-			tci_kernel<<< dimGrid, dimBlock, 0>>>( comp_a, comp_b, comp_c, tile->width, tile->height, level_shift, min, max);
-#endif
+			ictInverse->launchKernel(1,global_work_size, local_work_size);
 		}
 		break;
 
@@ -163,8 +155,6 @@ void Preprocessor::dc_level_shifting(type_image *img, int sign)
 	void *idata;
 	int min = 0;
 	int max = (1 << img->num_range_bits) - 1;
-
-//	start_measure();
 
 	for(i = 0; i < img->num_tiles; i++)
 	{

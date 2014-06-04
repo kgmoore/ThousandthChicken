@@ -283,13 +283,6 @@ typedef struct
 	short pos;
 } CtxWindow;
 
- void debug_print(float *val, int tid)
-{
-//	if(tid == 3)
-//		printf("dist:%f\n", *val);
-}
-
-
  void down(CodeBlockAdditionalInfo info, CtxWindow *window, GLOBAL  unsigned int  *coeffs)
 {
 	window->tr = coeffs[window->pos + 1 - info.width];
@@ -570,9 +563,6 @@ CONSTANT float distWeights[2][4][4] = {
 			if((window->c >> (3 * k)) & 1) // check if magnitude is 1
 			{
 				*sum_dist -= (float)((1<<bitplane)*(1<<bitplane));
-//					debug_print(sum_dist, threadIdx.x);
-//					if(blockIdx.x * blockDim.x + threadIdx.x == 0)
-//					printf("clu:%f tid:%d\n", *sum_dist, blockIdx.x * blockDim.x + threadIdx.x);
 				SetNthBit(window->c, 1 + 3 * k); // set k-th significant state
 				sig = buildCtxReg(window, 1); // rebuild significance register
 
@@ -603,9 +593,6 @@ CONSTANT float distWeights[2][4][4] = {
 			if((window->c >> (3 * i)) & 1)
 			{
 				*sum_dist -= (float)((1<<bitplane)*(1<<bitplane));
-//				debug_print(sum_dist, threadIdx.x);
-//				if(blockIdx.x * blockDim.x + threadIdx.x == 0)
-//				printf("sig:%f tid:%d\n", *sum_dist, blockIdx.x * blockDim.x + threadIdx.x);
 				SetNthBit(window->c, 1 + (3 * i));
 				sig = buildCtxReg(window, 1); // rebuild
 
@@ -632,9 +619,6 @@ CONSTANT float distWeights[2][4][4] = {
 			((window->c >> (3 * i)) & 0x4006) == 0x2)
 		{
 			*sum_dist -= (float)((1<<bitplane)*(1<<bitplane));
-//			debug_print(sum_dist, threadIdx.x);
-//			if(blockIdx.x * blockDim.x + threadIdx.x == 0)
-//			printf("mgr:%f tid:%d\n", *sum_dist, blockIdx.x * blockDim.x + threadIdx.x);
 			//MagRefCodingFunctor()(mq, window, i);
 			window->c |= (mqDecode(mq, getMRCX(buildCtxReg(window, 1), window->c, i)) << (3 * i));
 			SetNthBit(window->c, 3 * i + 12);
@@ -872,13 +856,8 @@ KERNEL void g_decode(GLOBAL unsigned int *stBuffers, GLOBAL unsigned char *codes
 
 			uploadMags(codeblockInfo, st, 30 - codeblockInfo.magbits - i + codeblockInfo.significantBits,decodedCoefficients);
 		}
-
 		uploadSigns(codeblockInfo, st,decodedCoefficients);
-		
 	}
-
-	
-	
 }
 
 

@@ -26,7 +26,7 @@ void KERNEL idc_level_shift_kernel(GLOBAL int *idata, const unsigned short width
 		while(i < TILE_SIZEX && n < width)
 		{
 			cache = idata[idx] + (1 << level_shift);
-			idata[idx] = clamp_val(cache, min, max);
+			idata[idx] = clamp(cache, min, max);
 //			idata[idx] = idata[idx] + (1 << level_shift);
 			i += BLOCK_SIZE;
 			n = i + getGroupId(0) * TILE_SIZEX;

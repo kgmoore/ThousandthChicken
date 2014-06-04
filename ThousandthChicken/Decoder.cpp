@@ -7,12 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "codestream_image_types.h"
-#include "config_parameters.h"
 #include "logger.h"
 #include "boxes.h"
 #include "io_buffered_stream.h"
 #include "codestream.h"
 #include "basic.h"
+#include <time.h>
 
 
 
@@ -53,14 +53,11 @@ void init_dec_buffer(FILE *fsrc, type_buffer *src_buff) {
 
 int Decoder::decode(std::string fileName)
 {
+	clock_t uptime = (1000 * clock()) / CLOCKS_PER_SEC;
 	//	println_start(INFO);
 	type_image *img = (type_image *)malloc(sizeof(type_image));
 	memset(img, 0, sizeof(type_image));
 	img->in_file = fileName.c_str();
-	type_parameters *param = (type_parameters*)malloc(sizeof(type_parameters));
-	default_config_values(param);
-	//init_device(param);
-
 	FILE *fsrc = fopen(img->in_file, "rb");
 	if (!fsrc) {
 		fprintf(stderr, "Error, failed to open %s for reading\n", img->in_file);
@@ -87,8 +84,7 @@ int Decoder::decode(std::string fileName)
 				
 				//allocate image tile component memory on device 
 				cl_int err = CL_SUCCESS;
-				int dataTypeSize = tile->parent_img->wavelet_type ? sizeof(float) : sizeof(int);
-				tile_comp->img_data_d = (void*)clCreateBuffer(_ocl->context, CL_MEM_READ_WRITE, tile_comp->width * tile_comp->height * dataTypeSize, NULL, &err);
+				tile_comp->img_data_d = (void*)clCreateBuffer(_ocl->context, CL_MEM_READ_WRITE, tile_comp->width * tile_comp->height * sizeof(int), NULL, &err);
 				SAMPLE_CHECK_ERRORS(err);
 				if (tile_comp->img_data_d  == 0)
 					throw Error("Failed to create tile component Buffer!");
@@ -99,11 +95,8 @@ int Decoder::decode(std::string fileName)
 		// Do decoding for all tiles
 		for(i = 0; i < img->num_tiles; i++) {
 			tile = &(img->tile[i]);
-			/* Decode data */
 			coder.decode_tile(tile);
-			/* Dequantize data */
 			quantizer.dequantize_tile(tile);
-			/* Do inverse wavelet transform */
 			dwt.iwt(tile);
 		}
 
@@ -137,11 +130,8 @@ int Decoder::decode(std::string fileName)
 		// Do decoding for all tiles
 		for(i = 0; i < img->num_tiles; i++)	{
 			tile = &(img->tile[i]);
-			/* Decode data */
 			coder.decode_tile(tile);
-			/* Dequantize data */
 			quantizer.dequantize_tile(tile);
-			/* Do inverse wavelet transform */
 			dwt.iwt(tile);
 		}
 
@@ -162,5 +152,9 @@ int Decoder::decode(std::string fileName)
 			}
 		}
 	}
+
+	clock_t uptime2 = (1000 * clock()) / CLOCKS_PER_SEC;
+	println_var(INFO, "Decode time: %d ms ", uptime2 - uptime);
+	scanf("Press any key to exit");
 	return 0;
 }

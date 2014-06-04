@@ -47,7 +47,6 @@
     <ClCompile Include="codestream_image_mct.c" />
     <ClCompile Include="codestream_tag_tree_encode.c" />
     <ClCompile Include="CoefficientCoder.cpp" />
-    <ClCompile Include="config_parameters.c" />
     <ClCompile Include="Decoder.cpp" />
     <ClCompile Include="DWT.cpp" />
     <ClCompile Include="DWTForward53.cpp" />
@@ -76,7 +75,6 @@
     <ClInclude Include="codestream_tag_tree_encode.h" />
     <ClInclude Include="CoefficientCoder.h" />
     <ClInclude Include="coefficientcoder_common.h" />
-    <ClInclude Include="config_parameters.h" />
     <ClInclude Include="Decoder.h" />
     <ClInclude Include="DWT.h" />
     <ClInclude Include="DWTForward53.h" />
@@ -115,6 +113,7 @@
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CharacterSet>Unicode</CharacterSet>
@@ -181,7 +180,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(INTELOCLSDKROOT)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(INTELOCLSDKROOT)include;C:\bin\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__x86_64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>MaxSpeed</Optimization>
       <MinimalRebuild>true</MinimalRebuild>
@@ -192,8 +191,8 @@
       <PrecompiledHeader />
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(INTELOCLSDKROOT)lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(INTELOCLSDKROOT)lib\x64;C:\bin\opencv\build\x64\vc11\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OpenCL.lib;opencv_core249d.lib;opencv_imgproc249d.lib;opencv_highgui249d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

@@ -1,17 +1,15 @@
 #include "codestream_tag_tree_encode.h"
-#include <stdio.h>
+#include "logger.h"
 #include <stdlib.h>
 
 
 void tag_tree_reset(type_tag_tree *tree)
 {
 	int i;
-
-	if (NULL == tree) {
-		printf("Error!");
+	if (!tree) {
+		println_var(INFO, "Error: trying to reset null tag tree");
 		return;
 	}
-
 	for (i = 0; i < tree->num_nodes; i++) {
 		tree->nodes[i].value = 999;
 		tree->nodes[i].low = 0;
@@ -33,7 +31,7 @@ type_tag_tree *tag_tree_create(int num_leafs_h, int num_leafs_v)
 
 	tree = (type_tag_tree *) malloc(sizeof(type_tag_tree));
 	if (!tree) {
-		printf("Error!\n");
+		println_var(INFO, "Error: unable to allocate tag tree");
 		return NULL;
 	}
 	tree->num_leafs_h = num_leafs_h;
@@ -51,17 +49,15 @@ type_tag_tree *tag_tree_create(int num_leafs_h, int num_leafs_v)
 		++num_lvls;
 	} while (n > 1);
 
-	/* ADD */
 	if (tree->num_nodes == 0) {
 		free(tree);
-		printf("Error!\n");
+		println_var(INFO, "Error: tag tree with zero nodes");
 		return NULL;
 	}
-
 	tree->nodes = (type_tag_tree_node*) calloc(tree->num_nodes, sizeof(type_tag_tree_node));
 	if (!tree->nodes) {
 		free(tree);
-		printf("Error!\n");
+		println_var(INFO, "Error: tag tree with null nodes");
 		return NULL;
 	}
 
@@ -90,63 +86,8 @@ type_tag_tree *tag_tree_create(int num_leafs_h, int num_leafs_v)
 		}
 	}
 	node->parent = 0;
-
 	tag_tree_reset(tree);
-
 	return tree;
-}
-
-void tag_tree_setvalue(type_tag_tree *tree, int leaf_no, int value)
-{
-	type_tag_tree_node *node;
-	node = &tree->nodes[leaf_no];
-	while (node && node->value > value) {
-		node->value = value;
-		node = node->parent;
-	}
-}
-
-void encode_tag_tree(type_buffer *buffer, type_tag_tree *tree, int leaf_no, int threshold)
-{
-	type_tag_tree_node *stk[31];
-	type_tag_tree_node **stkptr;
-	type_tag_tree_node *node;
-	int low;
-
-	stkptr = stk;
-	node = &tree->nodes[leaf_no];
-	while (node->parent) {
-		*stkptr++ = node;
-		node = node->parent;
-	}
-
-	low = 0;
-	for (;;) {
-		if (low > node->low) {
-			node->low = low;
-		} else {
-			low = node->low;
-		}
-
-		while (low < threshold) {
-			if (low >= node->value) {
-				if (!node->known) {
-					write_one_bit(buffer);
-					//					printf("1");
-					node->known = 1;
-				}
-				break;
-			}
-			write_zero_bit(buffer);
-			//			printf("0");
-			++low;
-		}
-
-		node->low = low;
-		if (stkptr == stk)
-			break;
-		node = *--stkptr;
-	}
 }
 
 int decode_tag_tree(type_buffer *buffer, type_tag_tree *tree, int leaf_no, int threshold)
@@ -183,6 +124,5 @@ int decode_tag_tree(type_buffer *buffer, type_tag_tree *tree, int leaf_no, int t
 		}
 		node = *--stkptr;
 	}
-
 	return (node->value < threshold) ? 1 : 0;
 }

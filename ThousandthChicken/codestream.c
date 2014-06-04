@@ -79,7 +79,7 @@ void read_siz_marker(type_buffer *buffer, type_image *img)
 
 void read_cod_marker(type_buffer *buffer, type_image *img)
 {
-	int length, pos, i;
+	int length;
 	type_parameters *param = (type_parameters *)malloc(sizeof(type_parameters));
 	int marker;
 
@@ -306,9 +306,7 @@ int decode_num_coding_passes(type_buffer *buffer)
 int get_comma_code(type_buffer *buffer)
 {
 	int n;
-
 	for(n = 0; read_bits(buffer, 1); n++) ;
-
 	return n;
 }
 
@@ -326,19 +324,6 @@ int int_floorlog2(int a)
 	return l;
 }
 
-/**
- * @brief Returns max value from two integers.
- *
- * @param a
- * @param b
- * @return
- */
-int int_max(int a, int b)
-{
-	return (a > b) ? a : b;
-}
-
-
 void decode_packet_header(type_buffer *buffer, type_res_lvl *res_lvl)
 {
 	int i, j;
@@ -347,7 +332,6 @@ void decode_packet_header(type_buffer *buffer, type_res_lvl *res_lvl)
 	type_tile_comp *tile_comp = res_lvl->parent_tile_comp;
 	type_image *img = tile_comp->parent_tile->parent_img;
 	type_res_lvl *res_lvl_zero = &(tile_comp->res_lvls[0]);
-	type_packet *packet;
 	type_subband *sb;
 	type_codeblock *cblk;
 	unsigned int marker;
@@ -459,10 +443,6 @@ void decode_packet_header(type_buffer *buffer, type_res_lvl *res_lvl)
 	}
 }
 
-//TODO
-int sum_size = 0;
-
-
 void decode_packet_body(type_buffer *buffer, type_res_lvl *res_lvl)
 {
 	int i, j;
@@ -473,23 +453,8 @@ void decode_packet_body(type_buffer *buffer, type_res_lvl *res_lvl)
 		sb = &(res_lvl->subbands[i]);
 		for (j = 0; j < sb->num_cblks; j++) {
 			cblk = &(sb->cblks[j]);
-			/*if(!cblk->num_segments)
-			{
-				cblk->num_segments++;
-			}*/
-
 			cblk->codestream = (unsigned char*)malloc(cblk->length);
 			memcpy(cblk->codestream, buffer->bp, cblk->length);
-
-//			int z;
-//
-//			for(z = 0; z < cblk->length; z++)
-//			{
-//				printf("%x", cblk->codestream[z]);
-//			}
-//			printf("\n");
-
-			//printf("memcpy length %d\n", cblk->length);
 			skip_buffer(buffer, cblk->length);
 		}
 	}
@@ -502,7 +467,6 @@ void decode_tiles(type_buffer *buffer, type_tile *tile)
 	type_image *img = tile->parent_img;
 	type_tile_comp *tile_comp;
 	type_res_lvl *res_lvl;
-	int i;
 	int res_no;
 	int comp_no;
 
@@ -532,11 +496,6 @@ void decode_tiles(type_buffer *buffer, type_tile *tile)
 	}
 
 //	println_var(INFO, "tile_part_length %d", tile_part_length);
-
-//	for(i = 0; i < tile_part_length; i++)
-//	{
-//		read_buffer(buffer, 1);
-//	}
 }
 
 /**

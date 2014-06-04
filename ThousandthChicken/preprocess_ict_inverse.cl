@@ -19,7 +19,7 @@ typedef float type_data;
  * @param img_b 1D array with Y component of the image.
  * @param size Number of pixels in each component (width x height).
  */
-void KERNEL tci_kernel(GLOBAL type_data *img_r, GLOBAL type_data *img_g, GLOBAL type_data *img_b, const unsigned short width, const unsigned short height, const int level_shift, const int min, const int max) {
+void KERNEL tci_kernel(GLOBAL int *img_r, GLOBAL int *img_g, GLOBAL int *img_b, const unsigned short width, const unsigned short height, const int level_shift, const int min, const int max) {
 	int i = getLocalId(0);
 	int j = getLocalId(1);
 	int n = i + getGroupId(0) * TILE_SIZEX;
@@ -47,9 +47,9 @@ void KERNEL tci_kernel(GLOBAL type_data *img_r, GLOBAL type_data *img_g, GLOBAL 
 			g = (type_data)g + (1 << level_shift);
 			r = (type_data)r + (1 << level_shift);
 
-			img_b[idx] = clamp_val(b, min, max);
-			img_g[idx] = clamp_val(g, min, max);
-			img_r[idx] = clamp_val(r, min, max);
+			img_b[idx] = clamp((int)b, min, max);
+			img_g[idx] = clamp((int)g, min, max);
+			img_r[idx] = clamp((int)r, min, max);
 
 //			img_b[idx] = b + (1 << level_shift);
 //			img_g[idx] = g + (1 << level_shift);
