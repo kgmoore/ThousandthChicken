@@ -55,7 +55,8 @@ void init_dec_buffer(FILE *fsrc, type_buffer *src_buff) {
 
 int Decoder::decode(std::string fileName)
 {
-	clock_t uptime = (1000 * clock()) / CLOCKS_PER_SEC;
+	double t1 = time_stamp();
+
 	//	println_start(INFO);
 	type_image *img = (type_image *)malloc(sizeof(type_image));
 	memset(img, 0, sizeof(type_image));
@@ -155,8 +156,8 @@ int Decoder::decode(std::string fileName)
 		}
 	}
 	free(img);
-	clock_t uptime2 = (1000 * clock()) / CLOCKS_PER_SEC;
-	println_var(INFO, "Decode time: %d ms ", uptime2 - uptime);
+	double t2 = time_stamp();
+	println_var(INFO, "Decode time: %d ms ", (int)((t2 - t1)*1000));
 	scanf("Press any key to exit");
 	return 0;
 }
