@@ -153,33 +153,30 @@ void Preprocessor::dc_level_shifting(type_image *img, int sign)
 {
 	unsigned int i, j;
 	type_tile *tile;
-	void *idata;
+	int *idata;
 	int min = 0;
 	int max = (1 << img->num_range_bits) - 1;
+	int level_shift = img->num_range_bits - 1;
 
 	for(i = 0; i < img->num_tiles; i++)
 	{
 		tile = &(img->tile[i]);
+		size_t local_work_size[3] = {64,1,1};
+		size_t global_work_size[3] = {tile->width * tile->height, 1,1};
 		for(j = 0; j < img->num_components; j++)
 		{
-			idata = (&(tile->tile_comp[j]))->img_data_d;
-#ifdef CUDA
-			dim3 dimGrid((tile->width + (TILE_SIZEX - 1))/TILE_SIZEX, (tile->height + (TILE_SIZEY - 1))/TILE_SIZEY);
-			dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-			int level_shift = img->num_range_bits - 1;
-
+			idata = (int*)(&(tile->tile_comp[j]))->img_data_d;
 			if(sign < 0)
 			{
-				fdc_level_shift_kernel<<<dimGrid, dimBlock>>>( idata, tile->width, tile->height, level_shift);
+				setDCShiftKernelArgs<int>(dcShift,idata, tile->width, tile->height, level_shift);
+    			ict->launchKernel(1,global_work_size, local_work_size);
+
 			} else
 			{
-				idc_level_shift_kernel<<<dimGrid, dimBlock>>>( idata, tile->width, tile->height, level_shift, min, max);
+				setDCShiftInverseKernelArgs<int>(dcShiftInverse,idata, tile->width, tile->height, level_shift, min, max);
+				ictInverse->launchKernel(1,global_work_size, local_work_size);
+
 			}
-
-			cudaThreadSynchronize();
-
-			checkCUDAError("dc_level_shifting");
-#endif
 		}
 	}
 }
@@ -201,39 +198,40 @@ template <class T>  tDeviceRC Preprocessor::setColourTransformKernelArgs(Generic
 {
 	cl_int error_code =  DeviceSuccess;
 	cl_kernel targetKernel = myKernel->getKernel();
+	int argNum = 0;
 
 	 // Dynamically allocate local memory (allocated per workgroup)
-	error_code = clSetKernelArg(targetKernel, 0, sizeof(cl_mem), &img_r);
+	error_code = clSetKernelArg(targetKernel, argNum++, sizeof(cl_mem), &img_r);
 	if (DeviceSuccess != error_code)
 	{
 		LogError("Error: setColourTransformKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
 		return error_code;
 	}
-	error_code = clSetKernelArg(targetKernel, 1, sizeof(cl_mem), &img_g);
+	error_code = clSetKernelArg(targetKernel, argNum++, sizeof(cl_mem), &img_g);
 	if (DeviceSuccess != error_code)
 	{
 		LogError("Error: setColourTransformKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
 		return error_code;
 	}
-	error_code = clSetKernelArg(targetKernel, 2, sizeof(cl_mem), &img_b);
+	error_code = clSetKernelArg(targetKernel, argNum++, sizeof(cl_mem), &img_b);
 	if (DeviceSuccess != error_code)
 	{
 		LogError("Error: setColourTransformKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
 		return error_code;
 	}
-	error_code = clSetKernelArg(targetKernel, 3, sizeof(unsigned short), &width);
+	error_code = clSetKernelArg(targetKernel, argNum++, sizeof(unsigned short), &width);
 	if (DeviceSuccess != error_code)
 	{
 		LogError("Error: setColourTransformKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
 		return error_code;
 	}
-	error_code = clSetKernelArg(targetKernel, 4, sizeof(unsigned short), &height);
+	error_code = clSetKernelArg(targetKernel, argNum++, sizeof(unsigned short), &height);
 	if (DeviceSuccess != error_code)
 	{
 		LogError("Error: setColourTransformKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
 		return error_code;
 	}
-	error_code = clSetKernelArg(targetKernel, 5, sizeof(int), &level_shift);
+	error_code = clSetKernelArg(targetKernel,argNum++, sizeof(int), &level_shift);
 	if (DeviceSuccess != error_code)
 	{
 		LogError("Error: setColourTransformKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
@@ -255,13 +253,14 @@ template <class T>  tDeviceRC Preprocessor::setColourTransformInverseKernelArgs(
 		return error_code;
 	}
 	cl_kernel targetKernel = myKernel->getKernel();
-	error_code = clSetKernelArg(targetKernel, 6, sizeof(int), &minimum);
+	int argNum = 6;
+	error_code = clSetKernelArg(targetKernel, argNum++, sizeof(int), &minimum);
 	if (DeviceSuccess != error_code)
 	{
 		LogError("Error: setColourTransformKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
 		return error_code;
 	}
-	error_code = clSetKernelArg(targetKernel, 7, sizeof(int), &maximum);
+	error_code = clSetKernelArg(targetKernel, argNum++, sizeof(int), &maximum);
 	if (DeviceSuccess != error_code)
 	{
 		LogError("Error: setColourTransformKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
@@ -271,3 +270,72 @@ template <class T>  tDeviceRC Preprocessor::setColourTransformInverseKernelArgs(
 
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+template <class T>  tDeviceRC Preprocessor::setDCShiftKernelArgs(GenericKernel* myKernel,
+																     T *input, 
+																	 const unsigned short width, const unsigned short height,
+																	 const int level_shift)
+{
+	cl_int error_code =  DeviceSuccess;
+	cl_kernel targetKernel = myKernel->getKernel();
+	int argNum = 0;
+
+	 // Dynamically allocate local memory (allocated per workgroup)
+	error_code = clSetKernelArg(targetKernel, argNum++, sizeof(cl_mem), &input);
+	if (DeviceSuccess != error_code)
+	{
+		LogError("Error: setDCShiftKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
+		return error_code;
+	}
+	error_code = clSetKernelArg(targetKernel, argNum++, sizeof(unsigned short), &width);
+	if (DeviceSuccess != error_code)
+	{
+		LogError("Error: setDCShiftKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
+		return error_code;
+	}
+	error_code = clSetKernelArg(targetKernel, argNum++, sizeof(unsigned short), &height);
+	if (DeviceSuccess != error_code)
+	{
+		LogError("Error: setDCShiftKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
+		return error_code;
+	}
+	error_code = clSetKernelArg(targetKernel,argNum++, sizeof(int), &level_shift);
+	if (DeviceSuccess != error_code)
+	{
+		LogError("Error: setDCShiftKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
+		return error_code;
+	}
+	return DeviceSuccess;
+}
+
+template <class T>  tDeviceRC Preprocessor::setDCShiftInverseKernelArgs(GenericKernel* myKernel,
+																     T *input, 
+																	 const unsigned short width, const unsigned short height,
+																	 const int level_shift,
+																	 const int minimum,
+																	 const int maximum)
+{
+	cl_int error_code = setDCShiftKernelArgs(myKernel, input, width, height, level_shift);
+	if (DeviceSuccess != error_code)
+	{
+		return error_code;
+	}
+	cl_kernel targetKernel = myKernel->getKernel();
+	int argNum = 4;
+	error_code = clSetKernelArg(targetKernel, argNum++, sizeof(int), &minimum);
+	if (DeviceSuccess != error_code)
+	{
+		LogError("Error: setDCShiftInverseKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
+		return error_code;
+	}
+	error_code = clSetKernelArg(targetKernel, argNum++, sizeof(int), &maximum);
+	if (DeviceSuccess != error_code)
+	{
+		LogError("Error: setDCShiftInverseKernelArgs returned %s.\n", TranslateOpenCLError(error_code));
+		return error_code;
+	}
+	return DeviceSuccess;
+
+}

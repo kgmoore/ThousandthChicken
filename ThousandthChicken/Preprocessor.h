@@ -37,6 +37,17 @@ private:
 															   const int minimum,
 															   const int maximum);
 
+	template <class T>  tDeviceRC setDCShiftKernelArgs(GenericKernel* myKernel,
+		                                                       T *input,
+															   const unsigned short width, const unsigned short height, 
+															   const int level_shift);
+	template <class T>  tDeviceRC setDCShiftInverseKernelArgs(GenericKernel* myKernel,
+		                                                       T *input,
+															   const unsigned short width, const unsigned short height, 
+															   const int level_shift,
+															   const int minimum,
+															   const int maximum);
+
 	KernelInitInfoBase initInfo;
 
 	GenericKernel* ict;

@@ -15,25 +15,10 @@
  * @param level_shift Level shift.
  */
 void KERNEL fdc_level_shift_kernel(GLOBAL int *idata, const unsigned short width, const unsigned short height, const int level_shift) {
-	int i = getLocalId(0);
-	int j = getLocalId(1);
-	int n = i + getGroupId(0) * TILE_SIZEX;
-	int m = j + getGroupId(1) * TILE_SIZEY;
-	int idx = n + m * width;
-
-	while(j < TILE_SIZEY && m < height)
-	{
-		while(i < TILE_SIZEX && n < width)
-		{
-			idata[idx] = idata[idx] - (1 << level_shift);
-			i += BLOCK_SIZE;
-			n = i + getGroupId(0) * TILE_SIZEX;
-			idx = n + m * width;
-		}
-		i = getLocalId(0);
-		j += BLOCK_SIZE;
-		n = i + getGroupId(0) * TILE_SIZEX;
-		m = j + getGroupId(1) * TILE_SIZEY;
-		idx = n + m * width;
-	}
+    int dcShift = 1 << level_shift;
+	int index = getGlobalId(0);
+	if (index >= width*height)
+	    return;
+ 
+	idata[index] -= dcShift;
 }
