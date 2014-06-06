@@ -1,3 +1,4 @@
+// License: please see LICENSE2 file for more details.
 #include "Preprocessor.h"
 #include "codestream_image_types.h"
 #include "preprocess_constants.h"

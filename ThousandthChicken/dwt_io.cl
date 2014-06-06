@@ -1,3 +1,4 @@
+// License: please see LICENSE4 file for more details.
 #include "dwt_common.cl"
 
 /// Handles mirroring of image at edges in a DWT correct way.

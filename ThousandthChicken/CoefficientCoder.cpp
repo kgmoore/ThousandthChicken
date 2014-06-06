@@ -1,3 +1,5 @@
+// License: please see LICENSE2 file for more details.
+
 #include "CoefficientCoder.h"
 
 #include "coefficientcoder_common.h"

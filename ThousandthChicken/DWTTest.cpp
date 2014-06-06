@@ -1,3 +1,5 @@
+// License: please see LICENSE1 file for more details.
+
 #include "DWTTest.h"
 
 #include "opencv2/core/core.hpp"
@@ -48,10 +50,10 @@ Mat ReadInputImage(const std::string &fileName, int flag, int alignCols, int ali
 
 void DWTTest::test(ocl_args_d_t* ocl)
 {
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// DWT
-	///////////////////////////////////////////////////////////////////////////////
+    
+    ////////////////////////////////////////////////////////////////////////////////
+    // DWT
+    ///////////////////////////////////////////////////////////////////////////////
     // Read the input image
     Mat img_src = ReadInputImage(OCL_SAMPLE_IMAGE_NAME, CV_8UC1, 8, 64);
     if (img_src.empty())
@@ -62,64 +64,64 @@ void DWTTest::test(ocl_args_d_t* ocl)
 
     Mat img_dst = Mat::zeros(img_src.size(), CV_8UC1);
 
-	
-	int imageSize = img_src.cols * img_src.rows;
+    
+    int imageSize = img_src.cols * img_src.rows;
 
-	 imshow("Before:", img_src);
+     imshow("Before:", img_src);
      waitKey();
-	const bool isLossy = false;
-	const bool writeOutput = false;
-	if (isLossy) {
-		DWTForward97* fdwt97 = new DWTForward97(KernelInitInfoBase(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_f97.cl\""));
-		DWTReverse97* rdwt97 = new DWTReverse97(KernelInitInfoBase(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_r97.cl\""));
+    const bool isLossy = false;
+    const bool writeOutput = false;
+    if (isLossy) {
+        DWTForward97* fdwt97 = new DWTForward97(KernelInitInfoBase(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_f97.cl\""));
+        DWTReverse97* rdwt97 = new DWTReverse97(KernelInitInfoBase(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_r97.cl\""));
 
-		float* input = new float[imageSize];
-		for (int i = 0; i < imageSize; ++i) {
-			input[i] = (img_src.ptr()[i]/255.0f) - 0.5f;  // normalize to [-0.5, +0.5] range
-		}
-		
+        float* input = new float[imageSize];
+        for (int i = 0; i < imageSize; ++i) {
+            input[i] = (img_src.ptr()[i]/255.0f) - 0.5f;  // normalize to [-0.5, +0.5] range
+        }
+        
 
-		fdwt97->run(input, img_src.cols, img_src.rows, 1);
-		float* forward = fdwt97->mapOutputBufferToHost();
-		rdwt97->run(forward, img_src.cols, img_src.rows, 1);
-		float* reverse = rdwt97->mapOutputBufferToHost();
-		for (int i = 0; i < imageSize; ++i)
-			img_dst.ptr()[i] =  (uchar)((reverse[i] + 0.5f) * 255.0f); // convert to [0, 255] range
+        fdwt97->run(input, img_src.cols, img_src.rows, 1);
+        float* forward = fdwt97->mapOutputBufferToHost();
+        rdwt97->run(forward, img_src.cols, img_src.rows, 1);
+        float* reverse = rdwt97->mapOutputBufferToHost();
+        for (int i = 0; i < imageSize; ++i)
+            img_dst.ptr()[i] =  (uchar)((reverse[i] + 0.5f) * 255.0f); // convert to [0, 255] range
 
-		if (writeOutput)
-		   imwrite("c:\\tmp\\baboon53.png", img_dst);
-
-
-		delete fdwt97;
-		delete[] input;
-
-	} else {
-		
-		DWTForward53* fdwt53 = new DWTForward53( KernelInitInfoBase(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_f53.cl\""));
-		DWTReverse53* rdwt53 = new DWTReverse53( KernelInitInfoBase(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_r53.cl\""));
+        if (writeOutput)
+           imwrite("c:\\tmp\\baboon53.png", img_dst);
 
 
-		int* input = new int[imageSize];
-		for (int i = 0; i < imageSize; ++i) {
-			input[i] = img_src.ptr()[i] - 128;  // normalize to [-128,127] range
-		}
+        delete fdwt97;
+        delete[] input;
 
-		fdwt53->run(input, img_src.cols, img_src.rows, 1);
-		int* forward = fdwt53->mapOutputBufferToHost();
-		//rdwt53->run(forward, img_src.cols, img_src.rows, 1);
-		//int* reverse = rdwt53->mapOutputBufferToHost();
-		for (int i = 0; i < imageSize; ++i)
-			//img_dst.ptr()[i] =  input[i] == reverse[i] ? 0 : 255;  // do diff with input image
-			img_dst.ptr()[i] =  forward[i] + 128;
-				
-		if (writeOutput)
-		   imwrite("c:\\tmp\\baboon53.png", img_dst);
+    } else {
+        
+        DWTForward53* fdwt53 = new DWTForward53( KernelInitInfoBase(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_f53.cl\""));
+        DWTReverse53* rdwt53 = new DWTReverse53( KernelInitInfoBase(ocl->commandQueue, "-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\dwt_r53.cl\""));
 
-		delete rdwt53;
-		delete fdwt53;
-		delete[] input;
 
-	}
+        int* input = new int[imageSize];
+        for (int i = 0; i < imageSize; ++i) {
+            input[i] = img_src.ptr()[i] - 128;  // normalize to [-128,127] range
+        }
+
+        fdwt53->run(input, img_src.cols, img_src.rows, 1);
+        int* forward = fdwt53->mapOutputBufferToHost();
+        //rdwt53->run(forward, img_src.cols, img_src.rows, 1);
+        //int* reverse = rdwt53->mapOutputBufferToHost();
+        for (int i = 0; i < imageSize; ++i)
+            //img_dst.ptr()[i] =  input[i] == reverse[i] ? 0 : 255;  // do diff with input image
+            img_dst.ptr()[i] =  forward[i] + 128;
+                
+        if (writeOutput)
+           imwrite("c:\\tmp\\baboon53.png", img_dst);
+
+        delete rdwt53;
+        delete fdwt53;
+        delete[] input;
+
+    }
     imshow("After:", img_dst);
     waitKey();
 

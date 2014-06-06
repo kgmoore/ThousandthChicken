@@ -1,3 +1,4 @@
+// License: please see LICENSE2 file for more details.
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>

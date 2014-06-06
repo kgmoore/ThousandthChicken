@@ -1,3 +1,4 @@
+// License: please see LICENSE2 file for more details.
 #pragma once
 
 #ifdef __cplusplus

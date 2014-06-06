@@ -1,3 +1,4 @@
+// License: please see LICENSE1 file for more details.
 #include "ocl_util.h"
 
 #if defined(_WIN32)

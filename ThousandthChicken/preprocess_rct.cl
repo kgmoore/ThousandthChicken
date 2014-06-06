@@ -1,3 +1,4 @@
+// License: please see LICENSE2 file for more details.
 #include "platform.cl"
 #include "preprocess_constants.h"
 #include "preprocess_constants.cl"

@@ -1,3 +1,5 @@
+// License: please see LICENSE2 file for more details.
+
 #pragma once
 
 typedef struct type_tag_tree_node type_tag_tree_node;

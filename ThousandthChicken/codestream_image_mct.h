@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿// License: please see LICENSE2 file for more details.
+#pragma once
 
 #define MCT_8BIT_INT 0
 #define MCT_16BIT_INT 1

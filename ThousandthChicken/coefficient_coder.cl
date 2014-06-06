@@ -1,3 +1,5 @@
+// License: please see LICENSE2 file for more details.
+
 #include "coefficientcoder_common.h"
 #include "platform.cl"
 

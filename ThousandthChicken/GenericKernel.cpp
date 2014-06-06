@@ -1,3 +1,4 @@
+// License: please see LICENSE1 file for more details.
 #include "GenericKernel.h"
 
 #include "opencv2/core/core.hpp"

@@ -1,3 +1,5 @@
+// License: please see LICENSE4 file for more details.
+
 #include "DWT.h"
 #include "basic.h"
 #include <math.h>

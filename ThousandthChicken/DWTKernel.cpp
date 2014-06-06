@@ -1,3 +1,4 @@
+// License: please see LICENSE1 file for more details.
 #pragma once
 
 #include "DWTKernel.h"

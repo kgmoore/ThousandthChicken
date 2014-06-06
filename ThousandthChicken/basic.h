@@ -1,5 +1,6 @@
-#ifndef _INTEL_OPENCL_SAMPLE_BASIC_HPP_
-#define _INTEL_OPENCL_SAMPLE_BASIC_HPP_
+// License: please see LICENSE1 file for more details.
+
+#pragma once
 
 
 #include <cstdlib>
@@ -164,5 +165,3 @@ string exe_dir ();
 
 double eventExecutionTime (cl_event event);
 
-
-#endif  // end of include guard

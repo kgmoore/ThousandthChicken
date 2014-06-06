@@ -1,3 +1,5 @@
+// License: please see LICENSE2 file for more details.
+
 #include "codestream_image.h"
 #include <stdlib.h>
 #include "config_parameters.h"

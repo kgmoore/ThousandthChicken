@@ -1,3 +1,4 @@
+// License: please see LICENSE4 file for more details.
 #pragma once
 
 #include "platform.cl"

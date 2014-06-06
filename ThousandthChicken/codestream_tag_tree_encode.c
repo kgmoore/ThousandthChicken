@@ -1,3 +1,5 @@
+// License: please see LICENSE3 file for more details.
+
 #include "codestream_tag_tree_encode.h"
 #include "logger.h"
 #include <stdlib.h>

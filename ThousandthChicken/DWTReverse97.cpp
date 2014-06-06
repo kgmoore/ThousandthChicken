@@ -1,3 +1,5 @@
+// License: please see LICENSE1 file for more details.
+
 #include "DWTReverse97.h"
 #include "DWTKernel.cpp"
 
@@ -26,9 +28,9 @@ DWTReverse97::~DWTReverse97(void)
       const int llSizeY = divRndUp(sizeY, 2);
       dwt( llSizeX, llSizeY, levels - 1);
 
-	  tDeviceRC err = copyLLBandToSrc(llSizeX, llSizeY);
-	  if (err != DeviceSuccess)
-		  return;
+      tDeviceRC err = copyLLBandToSrc(llSizeX, llSizeY);
+      if (err != DeviceSuccess)
+          return;
     }
     
     // select right width of kernel for the size of the image

@@ -1,3 +1,5 @@
+// License: please see LICENSE2 file for more details.
+
 #include "Quantizer.h"
 
 #include "codestream_image_types.h"

@@ -9,4 +9,6 @@ path)
 
 For sample image files, clone https://github.com/CodecCentral/openjpeg-data  into c:\src folder.
 
+See LICENSE file for license details.
+
 

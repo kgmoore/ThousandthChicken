@@ -1,3 +1,5 @@
+// License: please see LICENSE1 file for more details.
+
 #include "platform.h"
 
 #include "ocl_util.h"

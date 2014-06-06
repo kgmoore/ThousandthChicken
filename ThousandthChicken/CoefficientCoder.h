@@ -1,3 +1,5 @@
+// License: please see LICENSE2 file for more details.
+
 #pragma once
 #include "GenericKernel.h"
 #include <list>

@@ -1,3 +1,4 @@
+// License: please see LICENSE4 file for more details.
 #include "dwt.cl"
 
 // 9/7 forward DWT lifting schema coefficients
