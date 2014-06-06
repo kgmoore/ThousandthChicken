@@ -154,7 +154,7 @@ int Decoder::decode(std::string fileName)
 			}
 		}
 	}
-
+	free(img);
 	clock_t uptime2 = (1000 * clock()) / CLOCKS_PER_SEC;
 	println_var(INFO, "Decode time: %d ms ", uptime2 - uptime);
 	scanf("Press any key to exit");

@@ -10,6 +10,7 @@ extern "C" {
 #include "config_parameters.h"
 
 void init_tiles(type_image **_img, type_parameters *param);
+void free_image(type_image* img);
 
 
 #ifdef __cplusplus

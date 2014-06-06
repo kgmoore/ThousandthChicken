@@ -137,8 +137,6 @@ int dispose_of(box *b) {
 		printf("NULL!\n");
 	else
 		free(b->lbox);
-	println(INFO, "A");
-
 	if (b->tbox)
 	   free(b->tbox);
 	if (b->dbox)

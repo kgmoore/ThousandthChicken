@@ -268,3 +268,17 @@ void init_tiles(type_image **_img, type_parameters *param) {
 	}
 	//	println_end(INFO);
 }
+
+void free_image(type_image* img) {
+	if (!img)
+		return;
+	if (img->coding_param)
+		free(img->coding_param);
+	img->coding_param = NULL;
+	if (img->tile)
+		free(img->tile);
+	img->tile = NULL;
+
+	free(img);
+
+}
