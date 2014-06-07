@@ -113,27 +113,6 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 	int codeBlocks = count;
 	int maxOutLength = MAX_CODESTREAM_SIZE;
 
-	cl_device_id device = NULL;
-	cl_context context  = NULL;
-
-    // Obtaing the OpenCL context from the command-queue properties
-	err = clGetCommandQueueInfo(queue, CL_QUEUE_CONTEXT, sizeof(cl_context), &context, NULL);
-	if (CL_SUCCESS != err)
-	{
-		LogError("Error: clGetCommandQueueInfo (CL_QUEUE_CONTEXT) returned %s.\n", TranslateOpenCLError(err));
-		return 0;
-	}
-
-    // Obtain the OpenCL device from the command-queue properties
-	err = clGetCommandQueueInfo(queue, CL_QUEUE_DEVICE, sizeof(cl_device_id), &device, NULL);
-	if (CL_SUCCESS != err)
-	{
-		LogError("Error: clGetCommandQueueInfo (CL_QUEUE_DEVICE) returned %s.\n", TranslateOpenCLError(err));
-		return 0;
-	}
-
-
-
     // execute kernel
 	cl_uint dev_alignment = requiredOpenCLAlignment(device);
 
@@ -157,7 +136,7 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 		h_infos[i].height = infos[i].height;
 		h_infos[i].nominalWidth = infos[i].nominalWidth;
 		h_infos[i].nominalHeight = infos[i].nominalHeight;
-		h_infos[i].stripeNo = (int) ceil(infos[i].height / 4.0f);
+		h_infos[i].stripeNo = ceil(infos[i].height / 4.0f);
 		h_infos[i].subband = infos[i].subband;
 		h_infos[i].magconOffset = magconOffset + infos[i].width;
 		h_infos[i].magbits = infos[i].magbits;
@@ -167,8 +146,7 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 		coefficientsOffset +=  infos[i].nominalWidth * infos[i].nominalHeight;
 
 	    //copy each code block codestream buffer to host memory block
-		memcpy((void *) (h_codestreamBuffers + i * maxOutLength), infos[i].codestream, sizeof(unsigned char) * infos[i].length);
-
+		memcpy(h_codestreamBuffers + i * maxOutLength, infos[i].codestream, infos[i].length);
 		magconOffset += h_infos[i].width * (h_infos[i].stripeNo + 2);
 	}
 
@@ -179,7 +157,7 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
         throw Error("Failed to create d_decodedCoefficientsBuffers Buffer!");
 
 	//allocate d_codestreamBuffer on device and pin to host memory
-	cl_mem d_codestreamBuffers = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(unsigned char) * codeBlocks * maxOutLength, h_codestreamBuffers, &err);
+	cl_mem d_codestreamBuffers = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, codeBlocks * maxOutLength, h_codestreamBuffers, &err);
     SAMPLE_CHECK_ERRORS(err);
     if (d_codestreamBuffers == (cl_mem)0)
         throw Error("Failed to create d_codestreamBuffers Buffer!");
@@ -201,23 +179,23 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 
 	/////////////////////////////////////////////////////////////////////////////
 	// set kernel arguments ///////////////////////////////
-	
-	err = clSetKernelArg(myKernel, 0, sizeof(cl_mem), (void *) &d_stBuffers);
+	int argNum = 0;
+	err = clSetKernelArg(myKernel, argNum++, sizeof(cl_mem),  &d_stBuffers);
     SAMPLE_CHECK_ERRORS(err);
 	
-	err = clSetKernelArg(myKernel, 1, sizeof(cl_mem), (void *) &d_codestreamBuffers);
+	err = clSetKernelArg(myKernel, argNum++, sizeof(cl_mem), &d_codestreamBuffers);
     SAMPLE_CHECK_ERRORS(err);
 	
-	err = clSetKernelArg(myKernel, 2, sizeof(int), (void *) &maxOutLength);
+	err = clSetKernelArg(myKernel, argNum++, sizeof(int),  &maxOutLength);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(myKernel, 3, sizeof(cl_mem), (void *) &d_infos);
+	err = clSetKernelArg(myKernel, argNum++, sizeof(cl_mem), &d_infos);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(myKernel, 4, sizeof(int), (void *) &codeBlocks);
+	err = clSetKernelArg(myKernel, argNum++, sizeof(int),  &codeBlocks);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(myKernel, 5, sizeof(cl_mem), (void *) &d_decodedCoefficientsBuffers);
+	err = clSetKernelArg(myKernel, argNum++, sizeof(cl_mem), &d_decodedCoefficientsBuffers);
     SAMPLE_CHECK_ERRORS(err);
 
 	//////////////////////////////////////////////////////////////////////////////////

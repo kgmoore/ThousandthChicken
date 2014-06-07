@@ -120,28 +120,29 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 
 	/////////////////////////////////////
 	//set kernel arguments
-	err = clSetKernelArg(quantKernel, 0, sizeof(cl_mem), (void *) &d_subbandCodeblockCoefficients);
+	int argNum = 0;
+	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_mem), (void *) &tile_comp->img_data_d);
     SAMPLE_CHECK_ERRORS(err);
 	
-	err = clSetKernelArg(quantKernel, 1, sizeof(cl_int2), (void *) &isize);
+	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_int2), (void *) &isize);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(quantKernel, 2, sizeof(cl_mem), (void *)&tile_comp->img_data_d);
+	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_mem), (void *)&tile_comp->img_data_d);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(quantKernel, 3, sizeof(int), (void *)&odataOffset);
+	err = clSetKernelArg(quantKernel, argNum++, sizeof(int), (void *)&odataOffset);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(quantKernel, 4, sizeof(cl_int2), (void *) &osize);
+	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_int2), (void *) &osize);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(quantKernel, 5, sizeof(cl_int2), (void *) &cblk_size);
+	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_int2), (void *) &cblk_size);
     SAMPLE_CHECK_ERRORS(err);
 
 	if (img->wavelet_type) {
-		err = clSetKernelArg(quantKernel, 6, sizeof(float), (void *) &sb->convert_factor);
+		err = clSetKernelArg(quantKernel, argNum++, sizeof(float), (void *) &sb->convert_factor);
 	} else {
-		err = clSetKernelArg(quantKernel, 6, sizeof(int), (void *) &shift_bits);
+		err = clSetKernelArg(quantKernel, argNum++, sizeof(int), (void *) &shift_bits);
 	}
 	 SAMPLE_CHECK_ERRORS(err);
 
