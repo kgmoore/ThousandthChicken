@@ -1,6 +1,5 @@
 // License: please see LICENSE2 file for more details.
 #include "platform.cl"
-#include "preprocess_constants.h"
 #include "preprocess_constants.cl"
 
 
@@ -22,9 +21,7 @@ void KERNEL ict_kernel(GLOBAL int *img_r, GLOBAL int *img_g, GLOBAL int *img_b, 
 
     int dcShift = 1 << level_shift;
 	int index = getGlobalId(0);
-	if (index >= width*height)
-	    return;
-    
+
 	int r = img_r[index] - dcShift;
 	int g = img_g[index] - dcShift;
 	int b = img_b[index] - dcShift;

@@ -25,11 +25,14 @@
     <Filter Include="Decoder">
       <UniqueIdentifier>{87cc863a-96e6-4f26-9de9-0a5d01e4ef6f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GPU">
-      <UniqueIdentifier>{91f57477-163b-4388-b49b-005ff218064b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="FileFormat">
       <UniqueIdentifier>{ff6ba567-e04f-4bba-bf2d-e7ca71341c33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scheduler">
+      <UniqueIdentifier>{4b1339a3-ecd8-47ea-a5b1-24b57b416647}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Device">
+      <UniqueIdentifier>{91f57477-163b-4388-b49b-005ff218064b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -58,7 +61,7 @@
       <Filter>DWT</Filter>
     </Intel_OpenCL_Build_Rules>
     <Intel_OpenCL_Build_Rules Include="platform.cl">
-      <Filter>GPU</Filter>
+      <Filter>Device</Filter>
     </Intel_OpenCL_Build_Rules>
     <Intel_OpenCL_Build_Rules Include="coefficient_coder.cl">
       <Filter>CoefficientCoder</Filter>
@@ -107,11 +110,8 @@
     <ClCompile Include="DWTReverse97.cpp">
       <Filter>DWT</Filter>
     </ClCompile>
-    <ClCompile Include="GenericKernel.cpp">
-      <Filter>GPU</Filter>
-    </ClCompile>
     <ClCompile Include="ocl_util.cpp">
-      <Filter>GPU</Filter>
+      <Filter>Device</Filter>
     </ClCompile>
     <ClCompile Include="io_buffered_stream.c">
       <Filter>IO</Filter>
@@ -145,7 +145,7 @@
       <Filter>CoefficientCoder</Filter>
     </ClCompile>
     <ClCompile Include="basic.cpp">
-      <Filter>GPU</Filter>
+      <Filter>Device</Filter>
     </ClCompile>
     <ClCompile Include="Quantizer.cpp">
       <Filter>Quantizer</Filter>
@@ -155,6 +155,12 @@
     </ClCompile>
     <ClCompile Include="Preprocessor.cpp">
       <Filter>Preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceKernel.cpp">
+      <Filter>Device</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceQueue.cpp">
+      <Filter>Device</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -173,14 +179,11 @@
     <ClInclude Include="DWTReverse97.h">
       <Filter>DWT</Filter>
     </ClInclude>
-    <ClInclude Include="GenericKernel.h">
-      <Filter>GPU</Filter>
-    </ClInclude>
     <ClInclude Include="ocl_util.h">
-      <Filter>GPU</Filter>
+      <Filter>Device</Filter>
     </ClInclude>
     <ClInclude Include="platform.h">
-      <Filter>GPU</Filter>
+      <Filter>Device</Filter>
     </ClInclude>
     <ClInclude Include="dwt_common.h">
       <Filter>DWT</Filter>
@@ -228,7 +231,7 @@
       <Filter>CoefficientCoder</Filter>
     </ClInclude>
     <ClInclude Include="basic.h">
-      <Filter>GPU</Filter>
+      <Filter>Device</Filter>
     </ClInclude>
     <ClInclude Include="Quantizer.h">
       <Filter>Quantizer</Filter>
@@ -239,8 +242,11 @@
     <ClInclude Include="Preprocessor.h">
       <Filter>Preprocessor</Filter>
     </ClInclude>
-    <ClInclude Include="preprocess_constants.h">
-      <Filter>Preprocessor</Filter>
+    <ClInclude Include="DeviceKernel.h">
+      <Filter>Device</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceQueue.h">
+      <Filter>Device</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

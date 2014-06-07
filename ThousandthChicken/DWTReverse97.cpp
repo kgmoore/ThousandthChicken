@@ -35,11 +35,11 @@ DWTReverse97::~DWTReverse97(void)
     
     // select right width of kernel for the size of the image
     if(sizeX >= 960) {
-      launchKernel(192, 8, sizeX, sizeY);
+      enqueue(192, 8, sizeX, sizeY);
     } else if (sizeX >= 480) {
-      launchKernel(128, 6,sizeX, sizeY);
+      enqueue(128, 6,sizeX, sizeY);
     } else {
-      launchKernel(64, 6, sizeX, sizeY);
+      enqueue(64, 6, sizeX, sizeY);
     }
   }
 

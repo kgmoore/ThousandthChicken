@@ -10,8 +10,8 @@ Quantizer::Quantizer(KernelInitInfoBase initInfo)  :
 	                    initInfo(initInfo)
 	                   
 {
-	 losslessKernel = new GenericKernel( KernelInitInfo(initInfo, "quantizer_lossless_inverse.cl", "subband_dequantization_lossless") );
-	 lossyKernel = new GenericKernel( KernelInitInfo(initInfo, "quantizer_lossy_inverse.cl", "subband_dequantization_lossy")) ;
+	 losslessKernel = new DeviceKernel( KernelInitInfo(initInfo, "quantizer_lossless_inverse.cl", "subband_dequantization_lossless") );
+	 lossyKernel = new DeviceKernel( KernelInitInfo(initInfo, "quantizer_lossy_inverse.cl", "subband_dequantization_lossy")) ;
 }
 
 
@@ -115,7 +115,7 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 	cl_int2 osize = {tile_comp->width, tile_comp->height};
 	cl_int2 cblk_size = {tile_comp->cblk_w, tile_comp->cblk_h};
 
-	GenericKernel* quant = img->wavelet_type ? lossyKernel : losslessKernel;
+	DeviceKernel* quant = img->wavelet_type ? lossyKernel : losslessKernel;
 	cl_kernel quantKernel =  quant->getKernel();
 
 	/////////////////////////////////////
@@ -150,7 +150,7 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 	size_t global_work_size[3] = {sb->num_xcblks * BLOCKSIZEX,   sb->num_ycblks * BLOCKSIZEY,1};
 	size_t local_work_size[3] = {BLOCKSIZEX, BLOCKSIZEY,1};
     // execute kernel
-	quant->launchKernel(2,global_work_size, local_work_size);
+	quant->execute(2,global_work_size, local_work_size);
     SAMPLE_CHECK_ERRORS(err);
 
 	err = clReleaseMemObject(d_subbandCodeblockCoefficients);

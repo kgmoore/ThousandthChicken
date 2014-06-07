@@ -119,6 +119,8 @@ void read_cod_marker(type_buffer *buffer, type_image *img)
 
 	init_tiles(&img, param);
 	/* TODO: In future read precinct partition */
+
+	free(param);
 }
 
 /**

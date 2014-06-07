@@ -20,11 +20,11 @@ DWTForward97::~DWTForward97(void)
   void DWTForward97::dwt(  int sizeX, int sizeY, int levels) {
   // select right width of kernel for the size of the image
     if(sizeX >= 960) {
-      launchKernel(192, 8, sizeX, sizeY);
+      enqueue(192, 8, sizeX, sizeY);
     } else if (sizeX >= 480) {
-      launchKernel(128, 6,sizeX, sizeY);
+      enqueue(128, 6,sizeX, sizeY);
     } else {
-      launchKernel(64, 6,  sizeX, sizeY);
+      enqueue(64, 6,  sizeX, sizeY);
     }
     
     // if this was not the last level, continue recursively with other levels

@@ -1,9 +1,9 @@
 // License: please see LICENSE1 file for more details.
 #pragma once
-#include "GenericKernel.h"
+#include "DeviceKernel.h"
 #include "platform.h"
 
-template <typename T> class DWTKernel : public GenericKernel
+template <typename T> class DWTKernel : public DeviceKernel
 {
 public:
     DWTKernel(int waveletImpulseDiameter, KernelInitInfo initInfo);
@@ -13,7 +13,7 @@ public:
     T* mapOutputBufferToHost();
 protected:
     virtual void dwt( int sizeX, int sizeY, int levels) =0;
-    void launchKernel (int WIN_SX, int WIN_SY, const int sx, const int sy);
+    void enqueue (int WIN_SX, int WIN_SY, const int sx, const int sy);
     int calcTransformDataBufferSize(int winsizex, int winsizey);
     tDeviceRC setWindowKernelArgs(int WIN_SX, int WIN_SY);
     tDeviceRC setImageSizeKernelArgs(int sx, int sy);

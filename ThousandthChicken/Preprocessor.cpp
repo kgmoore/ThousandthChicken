@@ -1,17 +1,16 @@
 // License: please see LICENSE2 file for more details.
 #include "Preprocessor.h"
 #include "codestream_image_types.h"
-#include "preprocess_constants.h"
 #include "logger.h"
 
 Preprocessor::Preprocessor(KernelInitInfoBase initInfo) :
 											initInfo(initInfo),
-											ict(new GenericKernel( KernelInitInfo(initInfo, "preprocess_ict.cl", "ict_kernel") )),
-											ictInverse(new GenericKernel( KernelInitInfo(initInfo, "preprocess_ict_inverse.cl", "tci_kernel") )),
-											rct(new GenericKernel( KernelInitInfo(initInfo, "preprocess_rct.cl", "rct_kernel") )),
-											rctInverse(new GenericKernel( KernelInitInfo(initInfo, "preprocess_rct_inverse.cl", "tcr_kernel") )),
-											dcShift(new GenericKernel( KernelInitInfo(initInfo, "preprocess_dc_level_shift.cl", "fdc_level_shift_kernel") )),
-											dcShiftInverse(new GenericKernel( KernelInitInfo(initInfo, "preprocess_dc_level_shift_inverse.cl", "idc_level_shift_kernel") ))
+											ict(new DeviceKernel( KernelInitInfo(initInfo, "preprocess_ict.cl", "ict_kernel") )),
+											ictInverse(new DeviceKernel( KernelInitInfo(initInfo, "preprocess_ict_inverse.cl", "tci_kernel") )),
+											rct(new DeviceKernel( KernelInitInfo(initInfo, "preprocess_rct.cl", "rct_kernel") )),
+											rctInverse(new DeviceKernel( KernelInitInfo(initInfo, "preprocess_rct_inverse.cl", "tcr_kernel") )),
+											dcShift(new DeviceKernel( KernelInitInfo(initInfo, "preprocess_dc_level_shift.cl", "fdc_level_shift_kernel") )),
+											dcShiftInverse(new DeviceKernel( KernelInitInfo(initInfo, "preprocess_dc_level_shift_inverse.cl", "idc_level_shift_kernel") ))
 
 {
 }
@@ -55,75 +54,41 @@ int Preprocessor::color_trans_gpu(type_image *img, color_trans_type type) {
 	int min = img->sign == SIGNED ? -(1 << (img->num_range_bits - 1)) : 0;
 	int max = img->sign == SIGNED ? (1 << (img->num_range_bits - 1)) - 1 : (1 << img->num_range_bits) - 1;
 
+	/////////////////////////////////////////////////////////////////////////////
 	// http://www.jpeg.org/.demo/FAQJpeg2k/functionalities.htm#What is the RCT?
+
+	bool isInverse = false;
+	DeviceKernel* targetKernel = NULL;
 	switch(type) {
 	case RCT:
-///		println_var(INFO, "start: RCT");
-		for(i = 0; i < img->num_tiles; i++) {
-			tile = &(img->tile[i]);
-			int* comp_a = (int*)(&(tile->tile_comp[0]))->img_data_d;
-			int* comp_b = (int*)(&(tile->tile_comp[1]))->img_data_d;
-			int* comp_c = (int*)(&(tile->tile_comp[2]))->img_data_d;
-			setColourTransformKernelArgs<int>(rct, comp_a, comp_b, comp_c, tile->width, tile->height, level_shift);
-
-			size_t local_work_size[3] = {64,1,1};
-			size_t global_work_size[3] = {tile->width * tile->height, 1,1};
-			rct->launchKernel(1,global_work_size, local_work_size);
-
-		}
+		targetKernel = rct;
 		break;
-
 	case TCR:
-//		println_var(INFO, "start: TCR");
-			for(i = 0; i < img->num_tiles; i++) {
-				tile = &(img->tile[i]);
-				int* comp_a = (int*)(&(tile->tile_comp[0]))->img_data_d;
-				int* comp_b = (int*)(&(tile->tile_comp[1]))->img_data_d;
-				int* comp_c = (int*)(&(tile->tile_comp[2]))->img_data_d;
-				setColourTransformInverseKernelArgs<int>(rctInverse, comp_a, comp_b, comp_c, tile->width, tile->height, level_shift, min, max);
-
-				size_t local_work_size[3] = {64,1,1};
-				size_t global_work_size[3] = {tile->width * tile->height, 1,1};
-
-				rctInverse->launchKernel(1,global_work_size, local_work_size);
-			}
+		isInverse = true;
+		targetKernel = ictInverse;
 		break;
-
 	case ICT:
-//		println_var(INFO, "start: ICT");
-		for(i = 0; i < img->num_tiles; i++) {
-			tile = &(img->tile[i]);
-			int* comp_a = (int*)(&(tile->tile_comp[0]))->img_data_d;
-			int* comp_b = (int*)(&(tile->tile_comp[1]))->img_data_d;
-			int* comp_c = (int*)(&(tile->tile_comp[2]))->img_data_d;
-			setColourTransformKernelArgs<int>(ict, comp_a, comp_b, comp_c, tile->width, tile->height, level_shift);
-
-			size_t local_work_size[3] = {64,1,1};
-			size_t global_work_size[3] = {tile->width * tile->height, 1,1};
-
-			ict->launchKernel(1,global_work_size, local_work_size);
-		}
-
+		targetKernel = ict;
 		break;
-
 	case TCI:
-//		println_var(INFO, "start: TCI");
-		for(i = 0; i < img->num_tiles; i++) {
+		isInverse = true;
+		targetKernel = ictInverse;
+		break;
+	}
+	for(i = 0; i < img->num_tiles; i++) {
 			tile = &(img->tile[i]);
 			int* comp_a = (int*)(&(tile->tile_comp[0]))->img_data_d;
 			int* comp_b = (int*)(&(tile->tile_comp[1]))->img_data_d;
 			int* comp_c = (int*)(&(tile->tile_comp[2]))->img_data_d;
-			setColourTransformInverseKernelArgs<int>(ictInverse, comp_a, comp_b, comp_c, tile->width, tile->height, level_shift, min, max);
+			if (isInverse)
+				setColourTransformInverseKernelArgs<int>(targetKernel, comp_a, comp_b, comp_c, tile->width, tile->height, level_shift, min, max);
+			else
+				setColourTransformKernelArgs<int>(targetKernel, comp_a, comp_b, comp_c, tile->width, tile->height, level_shift);
 
 			size_t local_work_size[3] = {64,1,1};
 			size_t global_work_size[3] = {tile->width * tile->height, 1,1};
-
-			ictInverse->launchKernel(1,global_work_size, local_work_size);
-		}
-		break;
-
+			targetKernel->execute(1,global_work_size, local_work_size);
 	}
-//	println_end(INFO);
 	return 0;
 }
 
@@ -169,12 +134,12 @@ void Preprocessor::dc_level_shifting(type_image *img, int sign)
 			if(sign < 0)
 			{
 				setDCShiftKernelArgs<int>(dcShift,idata, tile->width, tile->height, level_shift);
-    			ict->launchKernel(1,global_work_size, local_work_size);
+    			ict->execute(1,global_work_size, local_work_size);
 
 			} else
 			{
 				setDCShiftInverseKernelArgs<int>(dcShiftInverse,idata, tile->width, tile->height, level_shift, min, max);
-				ictInverse->launchKernel(1,global_work_size, local_work_size);
+				ictInverse->execute(1,global_work_size, local_work_size);
 
 			}
 		}
@@ -191,7 +156,7 @@ void Preprocessor::idc_level_shifting(type_image *img)
 	dc_level_shifting(img, 1);
 }
 
-template <class T>  tDeviceRC Preprocessor::setColourTransformKernelArgs(GenericKernel* myKernel,
+template <class T>  tDeviceRC Preprocessor::setColourTransformKernelArgs(DeviceKernel* myKernel,
 																     T *img_r, T *img_g, T *img_b, 
 																	 const unsigned short width, const unsigned short height,
 																	 const int level_shift)
@@ -240,7 +205,7 @@ template <class T>  tDeviceRC Preprocessor::setColourTransformKernelArgs(Generic
 	return DeviceSuccess;
 }
 
-template <class T>  tDeviceRC Preprocessor::setColourTransformInverseKernelArgs(GenericKernel* myKernel,
+template <class T>  tDeviceRC Preprocessor::setColourTransformInverseKernelArgs(DeviceKernel* myKernel,
 																     T *img_r, T *img_g, T *img_b, 
 																	 const unsigned short width, const unsigned short height,
 																	 const int level_shift,
@@ -273,7 +238,7 @@ template <class T>  tDeviceRC Preprocessor::setColourTransformInverseKernelArgs(
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-template <class T>  tDeviceRC Preprocessor::setDCShiftKernelArgs(GenericKernel* myKernel,
+template <class T>  tDeviceRC Preprocessor::setDCShiftKernelArgs(DeviceKernel* myKernel,
 																     T *input, 
 																	 const unsigned short width, const unsigned short height,
 																	 const int level_shift)
@@ -310,7 +275,7 @@ template <class T>  tDeviceRC Preprocessor::setDCShiftKernelArgs(GenericKernel* 
 	return DeviceSuccess;
 }
 
-template <class T>  tDeviceRC Preprocessor::setDCShiftInverseKernelArgs(GenericKernel* myKernel,
+template <class T>  tDeviceRC Preprocessor::setDCShiftInverseKernelArgs(DeviceKernel* myKernel,
 																     T *input, 
 																	 const unsigned short width, const unsigned short height,
 																	 const int level_shift,

@@ -1,5 +1,5 @@
 // License: please see LICENSE1 file for more details.
-#include "GenericKernel.h"
+#include "DeviceKernel.h"
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -8,21 +8,24 @@
 using namespace cv;
 
 
-GenericKernel::GenericKernel(KernelInitInfo initInfo) : myKernel(0),
-									queue(initInfo.cmd_queue),
-	                                program(0),
-									device(0),
-									context(0)
+DeviceKernel::DeviceKernel(KernelInitInfo initInfo) : myKernel(0),
+                                    queue(initInfo.cmd_queue),
+                                    program(0),
+                                    device(0),
+                                    context(0)
 {
-	CreateAndBuildKernel(initInfo.programName, initInfo.kernelName, initInfo.buildOptions);
+    CreateAndBuildKernel(initInfo.programName, initInfo.kernelName, initInfo.buildOptions);
+    deviceQueue = new DeviceQueue(QueueInfo(queue));
 }
 
-GenericKernel::~GenericKernel(void)
+DeviceKernel::~DeviceKernel(void)
 {
-	if (myKernel)
-		clReleaseKernel(myKernel);
-	if (program)
-		clReleaseProgram(program);
+    if (myKernel)
+        clReleaseKernel(myKernel);
+    if (program)
+        clReleaseProgram(program);
+    if (deviceQueue)
+        delete deviceQueue;
 }
 
 
@@ -62,38 +65,38 @@ int ReadSourceFromFile(const char* fileName, char** source, size_t* sourceSize)
 
 // Create and build the OpenCL program and create the kernel
 // The kernel returns in ocl
-int GenericKernel::CreateAndBuildKernel(string openCLFileName, string kernelName, string buildOptions)
+int DeviceKernel::CreateAndBuildKernel(string openCLFileName, string kernelName, string buildOptions)
 {
     cl_int error_code;
     size_t src_size = 0;
 
     // Obtaing the OpenCL context from the command-queue properties
-	error_code = clGetCommandQueueInfo(queue, CL_QUEUE_CONTEXT, sizeof(cl_context), &context, NULL);
-	if (CL_SUCCESS != error_code)
-	{
-		LogError("Error: clGetCommandQueueInfo (CL_QUEUE_CONTEXT) returned %s.\n", TranslateOpenCLError(error_code));
-		goto Finish;
-	}
+    error_code = clGetCommandQueueInfo(queue, CL_QUEUE_CONTEXT, sizeof(cl_context), &context, NULL);
+    if (CL_SUCCESS != error_code)
+    {
+        LogError("Error: clGetCommandQueueInfo (CL_QUEUE_CONTEXT) returned %s.\n", TranslateOpenCLError(error_code));
+        goto Finish;
+    }
 
     // Obtain the OpenCL device from the command-queue properties
-	error_code = clGetCommandQueueInfo(queue, CL_QUEUE_DEVICE, sizeof(cl_device_id), &device, NULL);
-	if (CL_SUCCESS != error_code)
-	{
-		LogError("Error: clGetCommandQueueInfo (CL_QUEUE_DEVICE) returned %s.\n", TranslateOpenCLError(error_code));
-		goto Finish;
-	}
+    error_code = clGetCommandQueueInfo(queue, CL_QUEUE_DEVICE, sizeof(cl_device_id), &device, NULL);
+    if (CL_SUCCESS != error_code)
+    {
+        LogError("Error: clGetCommandQueueInfo (CL_QUEUE_DEVICE) returned %s.\n", TranslateOpenCLError(error_code));
+        goto Finish;
+    }
 
 
-	error_code = clGetDeviceInfo(device, CL_DEVICE_LOCAL_MEM_SIZE, sizeof(cl_ulong), &localMemorySize, 0);
-	if (CL_SUCCESS != error_code)
-	{
-		LogError("Error: clGetDeviceInfo (CL_DEVICE_LOCAL_MEM_SIZE) returned %s.\n", TranslateOpenCLError(error_code));
-		goto Finish;
-	}
+    error_code = clGetDeviceInfo(device, CL_DEVICE_LOCAL_MEM_SIZE, sizeof(cl_ulong), &localMemorySize, 0);
+    if (CL_SUCCESS != error_code)
+    {
+        LogError("Error: clGetDeviceInfo (CL_DEVICE_LOCAL_MEM_SIZE) returned %s.\n", TranslateOpenCLError(error_code));
+        goto Finish;
+    }
 
     // Upload the OpenCL C source code from the input file to source
     // The size of the C program is returned in sourceSize
-	char* source = NULL;
+    char* source = NULL;
     error_code = ReadSourceFromFile(openCLFileName.c_str(), &source, &src_size);
     if (CL_SUCCESS != error_code)
     {
@@ -110,7 +113,7 @@ int GenericKernel::CreateAndBuildKernel(string openCLFileName, string kernelName
     }
 
     // Build (compile & link) the OpenCL C code
-	error_code = clBuildProgram(program, 1, &device,  buildOptions.c_str(), NULL, NULL);
+    error_code = clBuildProgram(program, 1, &device,  buildOptions.c_str(), NULL, NULL);
     if (error_code != CL_SUCCESS)
     {
         LogError("Error: clBuildProgram() for source program returned %s.\n", TranslateOpenCLError(error_code));
@@ -131,7 +134,7 @@ int GenericKernel::CreateAndBuildKernel(string openCLFileName, string kernelName
     }
 
     // Create the required kernel
-	myKernel = clCreateKernel(program, kernelName.c_str(), &error_code);
+    myKernel = clCreateKernel(program, kernelName.c_str(), &error_code);
     if (CL_SUCCESS != error_code)
     {
         LogError("Error: clCreateKernel returned %s.\n", TranslateOpenCLError(error_code));
@@ -147,27 +150,34 @@ Finish:
 }
 
 /*
-cl_int GenericKernel::launchKernel(size_t global_work_size[2]){
+cl_int DeviceKernel::enqueue(size_t global_work_size[2]){
 
     size_t lwx[3] = {0};
 
     // Obtains the local work-group size specified by the __attribute__((reqd_work_group_size(X, Y, Z))) qualifier
-	cl_int error_code = clGetKernelWorkGroupInfo(myKernel, device, CL_KERNEL_COMPILE_WORK_GROUP_SIZE, sizeof(lwx), lwx, NULL);
+    cl_int error_code = clGetKernelWorkGroupInfo(myKernel, device, CL_KERNEL_COMPILE_WORK_GROUP_SIZE, sizeof(lwx), lwx, NULL);
     if (CL_SUCCESS != error_code)
     {
         LogError("Error: clGetKernelWorkGroupInfo (CL_KERNEL_COMPILE_WORK_GROUP_SIZE) returned %s.\n", TranslateOpenCLError(error_code));
-		return error_code;
+        return error_code;
     }
-	size_t local_work_size[2] = {lwx[0],lwx[1]};
-	return launchKernelInternal(global_work_size, local_work_size);
+    size_t local_work_size[2] = {lwx[0],lwx[1]};
+    return launchKernelInternal(global_work_size, local_work_size);
 
 }
 */
 
 
-cl_int GenericKernel::launchKernel(int dimension, size_t global_work_size[3], size_t local_work_size[3]){
-	// call kernel
-	
+tDeviceRC DeviceKernel::execute(int dimension, size_t global_work_size[3], size_t local_work_size[3]){
+   
+	cl_int error_code = enqueue(dimension, global_work_size, local_work_size);
+	if (error_code != CL_SUCCESS)
+		return error_code;
+    return deviceQueue->finish();
+}
+
+tDeviceRC DeviceKernel::enqueue(int dimension, size_t global_work_size[3], size_t local_work_size[3]){
+   
     // Enqueue the command to synchronously execute the kernel on the device
     // The number of dimensions to be used by the global work-items and by work-items in the work-group is 2
     // The global IDs start at offset (0, 0)
@@ -176,14 +186,6 @@ cl_int GenericKernel::launchKernel(int dimension, size_t global_work_size[3], si
     if (CL_SUCCESS != error_code)
     {
         LogError("Error: clEnqueueNDRangeKernel returned %s.\n", TranslateOpenCLError(error_code));
-        return error_code;
-    }
-
-     // Wait until the end of the execution
-    error_code = clFinish(queue);
-    if (CL_SUCCESS != error_code)
-    {
-        LogError("Error: clFinish returned %s.\n", TranslateOpenCLError(error_code));
         return error_code;
     }
 	return CL_SUCCESS;

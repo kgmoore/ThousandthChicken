@@ -57,7 +57,6 @@ int Decoder::decode(std::string fileName)
 {
 	double t1 = time_stamp();
 
-	//	println_start(INFO);
 	type_image *img = (type_image *)malloc(sizeof(type_image));
 	memset(img, 0, sizeof(type_image));
 	img->in_file = fileName.c_str();
@@ -69,7 +68,6 @@ int Decoder::decode(std::string fileName)
 
 	type_tile *tile;
 	unsigned int i,j;
-
 	if(strstr(img->in_file, ".jp2") != NULL) {
 		println(INFO, "It's a JP2 file");
 
@@ -81,9 +79,7 @@ int Decoder::decode(std::string fileName)
 			type_tile* tile = img->tile + i;
 
 			for (j = 0; j < tile->parent_img->num_components; j++) {
-				//		println_var(INFO, "%d\n", i);
 				type_tile_comp* tile_comp = tile->tile_comp + j;
-
 				
 				//allocate image tile component memory on device 
 				cl_int err = CL_SUCCESS;
@@ -94,68 +90,40 @@ int Decoder::decode(std::string fileName)
 
 			}
 		}
-
-		// Do decoding for all tiles
-		for(i = 0; i < img->num_tiles; i++) {
-			tile = &(img->tile[i]);
-			coder.decode_tile(tile);
-			quantizer.dequantize_tile(tile);
-			dwt.iwt(tile);
-		}
-
-		if(img->use_mct == 1) {
-			// lossless decoder
-			if(img->wavelet_type == 0) {
-				preprocessor.color_decoder_lossless(img);
-			}
-			else { //lossy decoder
-				preprocessor.color_decoder_lossy(img);
-			}
-		} else if (img->use_part2_mct == 1) {
-			//klt.decode_klt(img);
-			//part 2 not supported
-		} else {
-			if(img->sign == UNSIGNED) {
-				preprocessor.idc_level_shifting(img);
-			}
-		}
-	}
-	else {//It is not a JP2 file.
+	} else {
 		type_buffer *src_buff = (type_buffer *) malloc(sizeof(type_buffer));
-
 		init_dec_buffer(fsrc, src_buff);
 		fclose(fsrc);
-
 		decode_codestream(src_buff, img);
+		free(src_buff);
+	}
 
-	//	get_next_box(fsrc);
+	// Do decoding for all tiles
+	for(i = 0; i < img->num_tiles; i++) {
+		tile = img->tile + i;
+		coder.decode_tile(tile);
+		quantizer.dequantize_tile(tile);
+		dwt.iwt(tile);
+	}
 
-		// Do decoding for all tiles
-		for(i = 0; i < img->num_tiles; i++)	{
-			tile = &(img->tile[i]);
-			coder.decode_tile(tile);
-			quantizer.dequantize_tile(tile);
-			dwt.iwt(tile);
+	if(img->use_mct == 1) {
+		// lossless decoder
+		if(img->wavelet_type == 0) {
+			preprocessor.color_decoder_lossless(img);
 		}
-
-		if(img->use_mct == 1) {
-			// lossless decoder
-			if(img->wavelet_type == 0) {
-				preprocessor.color_decoder_lossless(img);
-			}
-			else {  //lossy decoder
-				preprocessor.color_decoder_lossy(img);
-			}
-		} else if (img->use_part2_mct == 1) {
-			//klt.decode_klt(img);
-			//part 2 not supported
-		} else {
-			if(img->sign == UNSIGNED) {
-				preprocessor.idc_level_shifting(img);
-			}
+		else { //lossy decoder
+			preprocessor.color_decoder_lossy(img);
+		}
+	} else if (img->use_part2_mct == 1) {
+		//klt.decode_klt(img);
+		//part 2 not supported
+	} else {
+		if(img->sign == UNSIGNED) {
+			preprocessor.idc_level_shifting(img);
 		}
 	}
-	free(img);
+	
+	free_image(img);
 	double t2 = time_stamp();
 	println_var(INFO, "Decode time: %d ms ", (int)((t2 - t1)*1000));
 	scanf("Press any key to exit");

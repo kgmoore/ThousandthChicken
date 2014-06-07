@@ -48,6 +48,7 @@
     <ClCompile Include="codestream_tag_tree_encode.c" />
     <ClCompile Include="CoefficientCoder.cpp" />
     <ClCompile Include="Decoder.cpp" />
+    <ClCompile Include="DeviceQueue.cpp" />
     <ClCompile Include="DWT.cpp" />
     <ClCompile Include="DWTForward53.cpp" />
     <ClCompile Include="DWTForward97.cpp" />
@@ -55,7 +56,7 @@
     <ClCompile Include="DWTReverse53.cpp" />
     <ClCompile Include="DWTReverse97.cpp" />
     <ClCompile Include="DWTTest.cpp" />
-    <ClCompile Include="GenericKernel.cpp" />
+    <ClCompile Include="DeviceKernel.cpp" />
     <ClCompile Include="io_buffered_stream.c" />
     <ClCompile Include="logger.c" />
     <ClCompile Include="main.cpp" />
@@ -76,6 +77,7 @@
     <ClInclude Include="CoefficientCoder.h" />
     <ClInclude Include="coefficientcoder_common.h" />
     <ClInclude Include="Decoder.h" />
+    <ClInclude Include="DeviceQueue.h" />
     <ClInclude Include="DWT.h" />
     <ClInclude Include="DWTForward53.h" />
     <ClInclude Include="DWTForward97.h" />
@@ -84,13 +86,12 @@
     <ClInclude Include="DWTReverse97.h" />
     <ClInclude Include="DWTTest.h" />
     <ClInclude Include="dwt_common.h" />
-    <ClInclude Include="GenericKernel.h" />
+    <ClInclude Include="DeviceKernel.h" />
     <ClInclude Include="io_buffered_stream.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="ocl_util.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="Preprocessor.h" />
-    <ClInclude Include="preprocess_constants.h" />
     <ClInclude Include="Quantizer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

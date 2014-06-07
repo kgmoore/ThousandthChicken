@@ -10,18 +10,26 @@ typedef cl_mem tDeviceMem;
 typedef cl_int tDeviceRC;
 #define DeviceSuccess CL_SUCCESS
 
-struct KernelInitInfoBase {
+struct QueueInfo {
+	QueueInfo(cl_command_queue queue) :  cmd_queue(queue)
+	{}
+
+	cl_command_queue cmd_queue;
+
+};
+
+struct KernelInitInfoBase : QueueInfo {
 
 	KernelInitInfoBase(cl_command_queue queue, string bldOptions) :
-		                                 cmd_queue(queue), 
+		                                 QueueInfo(queue), 
 										 buildOptions(bldOptions)
 	{}
 	KernelInitInfoBase(const KernelInitInfoBase& other) : 
-		                                 cmd_queue(other.cmd_queue),
+		                                 QueueInfo(other.cmd_queue),
 										 buildOptions(other.buildOptions)
 	{
 	}
-	cl_command_queue cmd_queue;
+
 	string buildOptions;
 };
 

@@ -7,7 +7,7 @@
 
 template <typename T> DWTKernel<T>::DWTKernel(int impulseDiameter, 
 										  KernelInitInfo initInfo) :
-															GenericKernel(initInfo),
+															DeviceKernel(initInfo),
 															srcMem(0),
 															dstMem(0),
 															dimX(0),
@@ -86,7 +86,7 @@ template <typename T> cl_int DWTKernel<T>::run(T* in, int sizeX, int sizeY, int 
   /// @param out      output buffer
   /// @param sx       width of the input image 
   /// @param sy       height of the input image
-template <typename T>  void DWTKernel<T>::launchKernel (int WIN_SX, int WIN_SY, const int sx, const int sy) {
+template <typename T>  void DWTKernel<T>::enqueue (int WIN_SX, int WIN_SY, const int sx, const int sy) {
 
 	if (setWindowKernelArgs(WIN_SX, WIN_SY) != CL_SUCCESS)
 	  return;
@@ -121,7 +121,7 @@ template <typename T>  void DWTKernel<T>::launchKernel (int WIN_SX, int WIN_SY, 
     size_t global_work_size[3] = {divRndUp(sx, WIN_SX) * WIN_SX, divRndUp(sy, WIN_SY * steps),1};
 	size_t local_work_size[3] = {WIN_SX,1,1};
 
-	GenericKernel::launchKernel(2,global_work_size, local_work_size);
+	DeviceKernel::enqueue(2,global_work_size, local_work_size);
   }
 
 template <typename T> tDeviceRC DWTKernel<T>::copyLLBandToSrc(int LLSizeX, int LLSizeY){

@@ -1,7 +1,7 @@
 // License: please see LICENSE2 file for more details.
 
 #pragma once
-#include "GenericKernel.h"
+#include "DeviceKernel.h"
 
 
 #define BLOCKSIZEX 16
@@ -22,8 +22,8 @@ private:
 	type_subband* dequantization(type_subband *sb, void* coefficients);
 	int get_exp_subband_gain(int orient);
 	KernelInitInfoBase initInfo;
-	GenericKernel* lossyKernel;
-	GenericKernel* losslessKernel;
+	DeviceKernel* lossyKernel;
+	DeviceKernel* losslessKernel;
 
 };
 

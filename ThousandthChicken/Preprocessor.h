@@ -1,7 +1,7 @@
 // License: please see LICENSE2 file for more details.
 #pragma once
 
-#include "GenericKernel.h"
+#include "DeviceKernel.h"
 
 typedef struct type_image type_image;
 
@@ -26,22 +26,22 @@ public:
 private:
 	void dc_level_shifting(type_image *img, int sign);
 	int color_trans_gpu(type_image *img, color_trans_type type) ;
-	template <class T>  tDeviceRC setColourTransformKernelArgs(GenericKernel* myKernel,
+	template <class T>  tDeviceRC setColourTransformKernelArgs(DeviceKernel* myKernel,
 		                                                       T *img_r, T *img_g, T *img_b,
 															   const unsigned short width, const unsigned short height, 
 															   const int level_shift);
-	template <class T>  tDeviceRC setColourTransformInverseKernelArgs(GenericKernel* myKernel,
+	template <class T>  tDeviceRC setColourTransformInverseKernelArgs(DeviceKernel* myKernel,
 		                                                       T *img_r, T *img_g, T *img_b,
 															   const unsigned short width, const unsigned short height, 
 															   const int level_shift,
 															   const int minimum,
 															   const int maximum);
 
-	template <class T>  tDeviceRC setDCShiftKernelArgs(GenericKernel* myKernel,
+	template <class T>  tDeviceRC setDCShiftKernelArgs(DeviceKernel* myKernel,
 		                                                       T *input,
 															   const unsigned short width, const unsigned short height, 
 															   const int level_shift);
-	template <class T>  tDeviceRC setDCShiftInverseKernelArgs(GenericKernel* myKernel,
+	template <class T>  tDeviceRC setDCShiftInverseKernelArgs(DeviceKernel* myKernel,
 		                                                       T *input,
 															   const unsigned short width, const unsigned short height, 
 															   const int level_shift,
@@ -50,14 +50,14 @@ private:
 
 	KernelInitInfoBase initInfo;
 
-	GenericKernel* ict;
-	GenericKernel* ictInverse;
+	DeviceKernel* ict;
+	DeviceKernel* ictInverse;
 
-	GenericKernel* rct;
-	GenericKernel* rctInverse;
+	DeviceKernel* rct;
+	DeviceKernel* rctInverse;
 
-	GenericKernel* dcShift;
-	GenericKernel* dcShiftInverse;
+	DeviceKernel* dcShift;
+	DeviceKernel* dcShiftInverse;
 
 
 

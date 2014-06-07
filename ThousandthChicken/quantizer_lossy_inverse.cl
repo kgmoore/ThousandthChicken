@@ -43,7 +43,4 @@ KERNEL void subband_dequantization_lossy(GLOBAL int *idata, int2 isize, GLOBAL t
 		in = n + m * isize.x;
 		out = n + m * osize.x;
 	}
-
-	localMemoryFence();
-
 }

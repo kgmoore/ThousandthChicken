@@ -1,6 +1,5 @@
 // License: please see LICENSE2 file for more details.
 #include "platform.cl"
-#include "preprocess_constants.h"
 #include "preprocess_constants.cl"
 
 
@@ -15,10 +14,5 @@
  * @param level_shift Level shift.
  */
 void KERNEL fdc_level_shift_kernel(GLOBAL int *idata, const unsigned short width, const unsigned short height, const int level_shift) {
-    int dcShift = 1 << level_shift;
-	int index = getGlobalId(0);
-	if (index >= width*height)
-	    return;
- 
-	idata[index] -= dcShift;
+	idata[getGlobalId(0)] -=  1 << level_shift;
 }

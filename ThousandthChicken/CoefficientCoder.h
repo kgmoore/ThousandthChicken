@@ -1,7 +1,7 @@
 // License: please see LICENSE2 file for more details.
 
 #pragma once
-#include "GenericKernel.h"
+#include "DeviceKernel.h"
 #include <list>
 #include "codestream_image.h"
 
@@ -28,12 +28,12 @@ typedef struct
 	int dwtLevel;
 	float stepSize;
 
-	unsigned char *codeStream;
+	unsigned char *codestream;
 	int length;
 	type_codeblock *cblk;
 } EntropyCodingTaskInfo;
 
-class CoefficientCoder : 	public GenericKernel
+class CoefficientCoder : 	public DeviceKernel
 {
 public:
 	CoefficientCoder(KernelInitInfoBase initInfo);

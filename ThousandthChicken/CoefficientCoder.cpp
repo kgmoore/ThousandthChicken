@@ -21,7 +21,7 @@ using namespace std;
 
 
 CoefficientCoder::CoefficientCoder(KernelInitInfoBase initInfo) : 
-						GenericKernel( KernelInitInfo(initInfo, "coefficient_coder.cl", "g_decode") )
+						DeviceKernel( KernelInitInfo(initInfo, "coefficient_coder.cl", "g_decode") )
 {
 }
 
@@ -52,7 +52,7 @@ void CoefficientCoder::decode_tile(type_tile *tile)
 
 	float t = gpuDecode(tasks, num_tasks, &tile->coefficients);
 
-	printf("kernel consumption: %f\n", t);
+	printf("coefficient decoder kernel consumption: %f ms\n", t);
 	free(tasks);
 
 //	println_end(INFO);
@@ -101,18 +101,13 @@ void CoefficientCoder::convert_to_decoding_task(EntropyCodingTaskInfo &task, typ
 
 	task.magbits = cblk.parent_sb->mag_bits;
 
-	task.codeStream = cblk.codestream;
+	task.codestream = cblk.codestream;
 	task.length = cblk.length;
 	task.significantBits = cblk.significant_bits;
 }
 
 float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void** coefficients)
 {
-
-    LARGE_INTEGER perf_freq;
-    LARGE_INTEGER perf_start;
-    LARGE_INTEGER perf_stop;
-
     cl_int err = CL_SUCCESS;
 
 	int codeBlocks = count;
@@ -171,8 +166,8 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 		h_infos[i].d_coefficientsOffset = coefficientsOffset;
 		coefficientsOffset +=  infos[i].nominalWidth * infos[i].nominalHeight;
 
-	    //copy each code block codeStream buffer to host memory block
-		memcpy((void *) (h_codestreamBuffers + i * maxOutLength), infos[i].codeStream, sizeof(unsigned char) * infos[i].length);
+	    //copy each code block codestream buffer to host memory block
+		memcpy((void *) (h_codestreamBuffers + i * maxOutLength), infos[i].codestream, sizeof(unsigned char) * infos[i].length);
 
 		magconOffset += h_infos[i].width * (h_infos[i].stripeNo + 2);
 	}
@@ -229,43 +224,17 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 		
 	/////////////////////////////
 	// execute kernel
-	QueryPerformanceCounter(&perf_start);
+	double t1 = time_stamp();
 	const int THREADS = 32;
 	int groups = (int) ceil((float) codeBlocks / THREADS);
 	
 	size_t global_work_size[1] = {groups * THREADS};
 	size_t local_work_size[1] = {THREADS};
     // execute kernel
-	err =  launchKernel(1, global_work_size, local_work_size); 
+	err =  execute(1, global_work_size, local_work_size); 
     SAMPLE_CHECK_ERRORS(err);
 
-	QueryPerformanceCounter(&perf_stop);
-
-	/*
-	//////////////////////////////
-	// read memory back into host from decodedCoefficientsBuffer on device 
-	int* tmp_ptr = NULL;
-    tmp_ptr = (int*)clEnqueueMapBuffer(oclObjects.queue, d_decodedCoefficientsBuffers, true, CL_MAP_READ, 0,  sizeof(int) * coefficientsOffset, 0, NULL, NULL, NULL);
-    err = clFinish(oclObjects.queue);
-    SAMPLE_CHECK_ERRORS(err);
-
-	int* decodedCoefficientsBuffer = tmp_ptr;
-	coefficientsOffset = 0;
-	for(int i = 0; i < codeBlocks; i++)
-	{
-		int coeffecientsBufferSize = infos[i].nominalWidth * infos[i].nominalHeight;
-		infos[i].coefficients = (int*)malloc(coeffecientsBufferSize *sizeof(int));
-
-		if (infos[i].significantBits > 0)
-			memcpy(infos[i].coefficients, decodedCoefficientsBuffer, coeffecientsBufferSize * sizeof(int));
-		else
-			memset(infos[i].coefficients,  0, coeffecientsBufferSize * sizeof(int));
-      decodedBuffer +=  coeffecientsBufferSize;
-	}
-
-    err = clEnqueueUnmapMemObject(oclObjects.queue, d_decodedCoefficientsBuffers, tmp_ptr, 0, NULL, NULL);
-    SAMPLE_CHECK_ERRORS(err);
-	*/
+	double t2 = time_stamp();
 
     //////////////////////////////////////////
     //release memory
@@ -282,16 +251,8 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 	*coefficients = d_decodedCoefficientsBuffers;
 
 	aligned_free(h_infos);
-
 	aligned_free(h_codestreamBuffers);
-
-
-	// retrieve perf. counter frequency
-	QueryPerformanceCounter(&perf_stop);
-    QueryPerformanceFrequency(&perf_freq);
-    float rc =  (float)(perf_stop.QuadPart - perf_start.QuadPart)/(float)perf_freq.QuadPart;
-
-	return rc;
+	return (t2 - t1)* 1000;
 
 }
 
