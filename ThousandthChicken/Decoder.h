@@ -20,10 +20,10 @@ public:
 private:
 
 	ocl_args_d_t* _ocl;
-	CoefficientCoder coder;
-	Quantizer quantizer;
-	DWT dwt;
-	Preprocessor preprocessor;
+	CoefficientCoder* coder;
+	Quantizer* quantizer;
+	DWT* dwt;
+	Preprocessor* preprocessor;
 
 
 };

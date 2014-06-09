@@ -22,3 +22,15 @@ tDeviceRC DeviceQueue::finish(void)
     }
     return CL_SUCCESS;
 }
+
+tDeviceRC DeviceQueue::flush(void)
+{
+    // Wait until the end of the execution
+    cl_int error_code = clFinish(queue);
+    if (CL_SUCCESS != error_code)
+    {
+        LogError("Error: clFinish returned %s.\n", TranslateOpenCLError(error_code));
+        return error_code;
+    }
+    return CL_SUCCESS;
+}

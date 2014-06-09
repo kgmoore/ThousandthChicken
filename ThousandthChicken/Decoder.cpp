@@ -20,19 +20,28 @@
 
 
 Decoder::Decoder(ocl_args_d_t* ocl) : _ocl(ocl),
-									coder( KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\coefficient_coder.cl\""*/"")),
-									quantizer( KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/"")),
-									dwt(KernelInitInfoBase(_ocl->commandQueue, "")),
-									preprocessor(KernelInitInfoBase(_ocl->commandQueue, ""))
-
-
-	                     
+	                                  coder(NULL),
+									  quantizer(NULL),
+									  dwt(NULL),
+									  preprocessor(NULL)
 {
+	coder = new  CoefficientCoder(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\coefficient_coder.cl\""*/""));
+	quantizer = new Quantizer(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/""));
+	dwt = new DWT(KernelInitInfoBase(_ocl->commandQueue, ""));
+	preprocessor = new Preprocessor(KernelInitInfoBase(_ocl->commandQueue, ""));
 }
 
 
 Decoder::~Decoder(void)
 {
+	if (coder)
+		delete coder;
+	if (quantizer)
+		delete quantizer;
+	if (dwt)
+		delete dwt;
+	if (preprocessor)
+		delete preprocessor;
 }
 
 void init_dec_buffer(FILE *fsrc, type_buffer *src_buff) {
@@ -101,26 +110,32 @@ int Decoder::decode(std::string fileName)
 	// Do decoding for all tiles
 	for(i = 0; i < img->num_tiles; i++) {
 		tile = img->tile + i;
-		coder.decode_tile(tile);
-		quantizer.dequantize_tile(tile);
-		dwt.iwt(tile);
+		if (coder)
+			coder->decode_tile(tile);
+		if (quantizer)
+		     quantizer->dequantize_tile(tile);
+		if (dwt)
+			dwt->iwt(tile);
 	}
 
-	if(img->use_mct == 1) {
-		// lossless decoder
-		if(img->wavelet_type == 0) {
-			preprocessor.color_decoder_lossless(img);
+	if (preprocessor) {
+		if(img->use_mct == 1) {
+			// lossless decoder
+			if(img->wavelet_type == 0) {
+				preprocessor->color_decoder_lossless(img);
+			}
+			else { //lossy decoder
+				preprocessor->color_decoder_lossy(img);
+			}
+		} else if (img->use_part2_mct == 1) {
+			//klt.decode_klt(img);
+			//part 2 not supported
+		} else {
+			if(img->sign == UNSIGNED) {
+				preprocessor->idc_level_shifting(img);
+			}
 		}
-		else { //lossy decoder
-			preprocessor.color_decoder_lossy(img);
-		}
-	} else if (img->use_part2_mct == 1) {
-		//klt.decode_klt(img);
-		//part 2 not supported
-	} else {
-		if(img->sign == UNSIGNED) {
-			preprocessor.idc_level_shifting(img);
-		}
+
 	}
 	
 	free_image(img);
