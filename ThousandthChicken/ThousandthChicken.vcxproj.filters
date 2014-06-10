@@ -28,9 +28,6 @@
     <Filter Include="FileFormat">
       <UniqueIdentifier>{ff6ba567-e04f-4bba-bf2d-e7ca71341c33}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Scheduler">
-      <UniqueIdentifier>{4b1339a3-ecd8-47ea-a5b1-24b57b416647}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Device">
       <UniqueIdentifier>{91f57477-163b-4388-b49b-005ff218064b}</UniqueIdentifier>
     </Filter>
