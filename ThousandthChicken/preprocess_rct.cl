@@ -24,7 +24,7 @@ void KERNEL rct_kernel(GLOBAL int *img_r, GLOBAL int *img_g, GLOBAL int *img_b, 
 	int g = img_g[index];
 	int b = img_b[index];
 	
-	img_r[index] = (r + 2*g + b)>>2 - dcShift;
+	img_r[index] = ((r + 2*g + b)>>2) - dcShift;
 	img_g[index] = b - g;
 	img_b[index] =  r - g;
 

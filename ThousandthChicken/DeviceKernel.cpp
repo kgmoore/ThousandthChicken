@@ -161,28 +161,33 @@ cl_int DeviceKernel::enqueue(size_t global_work_size[2]){
         LogError("Error: clGetKernelWorkGroupInfo (CL_KERNEL_COMPILE_WORK_GROUP_SIZE) returned %s.\n", TranslateOpenCLError(error_code));
         return error_code;
     }
-    size_t local_work_size[2] = {lwx[0],lwx[1]};
-    return launchKernelInternal(global_work_size, local_work_size);
-
 }
 */
 
-
 tDeviceRC DeviceKernel::execute(int dimension, size_t global_work_size[3], size_t local_work_size[3]){
+	return execute(dimension, NULL, global_work_size, local_work_size);
+}
+
+
+tDeviceRC DeviceKernel::execute(int dimension, size_t global_work_offset[3],size_t global_work_size[3], size_t local_work_size[3]){
    
-	cl_int error_code = enqueue(dimension, global_work_size, local_work_size);
+	cl_int error_code = enqueue(dimension, global_work_offset ,global_work_size, local_work_size);
 	if (error_code != CL_SUCCESS)
 		return error_code;
     return deviceQueue->finish();
 }
 
 tDeviceRC DeviceKernel::enqueue(int dimension, size_t global_work_size[3], size_t local_work_size[3]){
+	return enqueue(dimension, NULL, global_work_size, local_work_size);
+}
+
+tDeviceRC DeviceKernel::enqueue(int dimension, size_t global_work_offset[3], size_t global_work_size[3], size_t local_work_size[3]){
    
     // Enqueue the command to synchronously execute the kernel on the device
     // The number of dimensions to be used by the global work-items and by work-items in the work-group is 2
     // The global IDs start at offset (0, 0)
     // The command should be executed immediately (without conditions)
-    cl_int error_code = clEnqueueNDRangeKernel(queue, myKernel, dimension, NULL, global_work_size, local_work_size, 0, NULL, NULL);
+    cl_int error_code = clEnqueueNDRangeKernel(queue, myKernel, dimension, global_work_offset, global_work_size, local_work_size, 0, NULL, NULL);
     if (CL_SUCCESS != error_code)
     {
         LogError("Error: clEnqueueNDRangeKernel returned %s.\n", TranslateOpenCLError(error_code));

@@ -159,6 +159,9 @@
     <ClCompile Include="DeviceQueue.cpp">
       <Filter>Device</Filter>
     </ClCompile>
+    <ClCompile Include="MemoryMapped.cpp">
+      <Filter>Decoder</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DWTForward53.h">
@@ -244,6 +247,9 @@
     </ClInclude>
     <ClInclude Include="DeviceQueue.h">
       <Filter>Device</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryMapped.h">
+      <Filter>Decoder</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

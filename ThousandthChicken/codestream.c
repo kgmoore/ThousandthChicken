@@ -10,6 +10,8 @@
 #include "codestream_image.h"
 #include "codestream_image_mct.h"
 
+CodeBlockCallback codeBlockCallback = NULL;
+
 
 
 void read_siz_marker(type_buffer *buffer, type_image *img)
@@ -457,8 +459,8 @@ void decode_packet_body(type_buffer *buffer, type_res_lvl *res_lvl)
 		sb = &(res_lvl->subbands[i]);
 		for (j = 0; j < sb->num_cblks; j++) {
 			cblk = &(sb->cblks[j]);
-			cblk->codestream = (unsigned char*)malloc(cblk->length);
-			memcpy(cblk->codestream, buffer->bp, cblk->length);
+			if (codeBlockCallback)
+				codeBlockCallback(cblk, buffer->bp);
 			skip_buffer(buffer, cblk->length);
 		}
 	}

@@ -117,7 +117,7 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 	cl_uint dev_alignment = requiredOpenCLAlignment(device);
 
 	// allocate codestream buffer on host
-	unsigned char* h_codestreamBuffers = (unsigned char*)aligned_malloc(sizeof(unsigned char) * codeBlocks * maxOutLength,dev_alignment);
+	unsigned char* h_codestreamBuffers = (unsigned char*)aligned_malloc(codeBlocks * maxOutLength,dev_alignment);
     if (h_codestreamBuffers == NULL)
         throw Error("Failed to create h_codestreamBuffer Buffer!");
 
@@ -203,7 +203,7 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 	/////////////////////////////
 	// execute kernel
 	double t1 = time_stamp();
-	const int THREADS = 32;
+	const int THREADS = 16;
 	int groups = (int) ceil((float) codeBlocks / THREADS);
 	
 	size_t global_work_size[1] = {groups * THREADS};

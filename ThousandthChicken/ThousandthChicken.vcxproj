@@ -60,6 +60,7 @@
     <ClCompile Include="io_buffered_stream.c" />
     <ClCompile Include="logger.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MemoryMapped.cpp" />
     <ClCompile Include="ocl_util.cpp" />
     <ClCompile Include="Preprocessor.cpp" />
     <ClCompile Include="Quantizer.cpp" />
@@ -89,6 +90,7 @@
     <ClInclude Include="DeviceKernel.h" />
     <ClInclude Include="io_buffered_stream.h" />
     <ClInclude Include="logger.h" />
+    <ClInclude Include="MemoryMapped.h" />
     <ClInclude Include="ocl_util.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="Preprocessor.h" />

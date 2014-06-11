@@ -14,8 +14,10 @@ public:
 	DeviceKernel(KernelInitInfo initInfo);
 	virtual ~DeviceKernel(void);
 	cl_kernel getKernel() { return myKernel;}
-	tDeviceRC enqueue(int dimension, size_t global_work_size[3], size_t local_work_size[3]);
-	tDeviceRC execute(int dimension, size_t global_work_size[3], size_t local_work_size[3]);
+	tDeviceRC enqueue(int dimension,  size_t global_work_size[3], size_t local_work_size[3]);
+	tDeviceRC execute(int dimension, size_t global_work_size[3],  size_t local_work_size[3]);
+	tDeviceRC enqueue(int dimension, size_t global_work_offset[3], size_t global_work_size[3], size_t local_work_size[3]);
+	tDeviceRC execute(int dimension, size_t global_work_offset[3], size_t global_work_size[3],  size_t local_work_size[3]);
 	tDeviceRC finish() { return deviceQueue->finish();}
 protected:
 	int CreateAndBuildKernel(string openCLFileName, string kernelName, string buildOptions);

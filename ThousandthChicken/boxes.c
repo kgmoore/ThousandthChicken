@@ -39,34 +39,26 @@ long int hex_to_long(unsigned char *hex, int length) {
 	return ret;
 }
 
-unsigned char *read_bytes(unsigned char *dest, FILE *fd, long int n) {
-	size_t bytesRead = 0;
-	size_t bytesRemaining = n;
-	unsigned char* target = dest;
-	while ( bytesRemaining > 0 && (bytesRead = fread(target, 1, bytesRemaining, fd)) != 0 )
-	{
-		bytesRemaining -= bytesRead;
-		target += bytesRead;
-	}
-	if (bytesRemaining != 0)
-		return NULL;
+unsigned char *read_bytes(unsigned char *dest, type_buffer* buffer, long int n) {
+	memcpy(dest, buffer->bp, n);
+	buffer->bp += n;
 	dest[n] = '\0';
 	return (unsigned char *)dest;
 }
 
 
-box *get_next_box(FILE *fd) {
+box *get_next_box(type_buffer* buffer) {
 	int read = 0;
 	box* box;
 	println_start(INFO);
 	box = init_box();
-	if( (box->lbox = read_bytes(box->lbox, fd, 4)) == NULL)
+	if( (box->lbox = read_bytes(box->lbox, buffer, 4)) == NULL)
 		return NULL;
 	box->length = hex_to_long(box->lbox, 4);
 	if(box->length == 0) {
 		return NULL;
 	}
-	if( (box->tbox = read_bytes(box->tbox, fd, 4)) == NULL) {
+	if( (box->tbox = read_bytes(box->tbox, buffer, 4)) == NULL) {
 		println(INFO, "Corrupted JP2 file. Exiting.");
 		return NULL;
 	}
@@ -74,14 +66,14 @@ box *get_next_box(FILE *fd) {
 
 	if(box->length == 1) { //there should be XLbox field present;
 		box->xlbox = (unsigned char*)malloc(9 * sizeof(char));
-		box->xlbox = read_bytes(box->xlbox, fd, 8);
+		box->xlbox = read_bytes(box->xlbox, buffer, 8);
 		box->length = hex_to_long(box->xlbox, 8);
 		read += 8;
 	}
 	box->content_length = box->length - read;
 
 	box->dbox = (unsigned char*)malloc((box->content_length + 1) * sizeof(char));
-	box->dbox = read_bytes(box->dbox, fd, box->content_length);
+	box->dbox = read_bytes(box->dbox, buffer, box->content_length);
 	println_end(INFO);
 	return box;
 }
@@ -270,8 +262,8 @@ void h_contiguous_codestream_box(box *cbox, type_image *img) {
 	println_end(INFO);
 }
 
-int jp2_parse_boxes(FILE *fd, type_image *img) {
-	box *sig = get_next_box(fd);
+int jp2_parse_boxes(type_buffer* src_buff, type_image *img) {
+	box *sig = get_next_box(src_buff);
 	box *ft=NULL, *b=NULL;
 
 	if(hex_to_long(sig->tbox, 4) != JP2_SIGNATURE_BOX)
@@ -283,7 +275,7 @@ int jp2_parse_boxes(FILE *fd, type_image *img) {
 	if (sig)
 	  dispose_of(sig);
 	sig = NULL;
-	ft = get_next_box(fd);
+	ft = get_next_box(src_buff);
 
 	if(hex_to_long(ft->tbox, 4) != JP2_FILETYPE_BOX)
 		println(INFO, "JP2 filetype box should directly follow JP2 signature box");
@@ -294,7 +286,7 @@ int jp2_parse_boxes(FILE *fd, type_image *img) {
 	   dispose_of(ft);
 	ft = NULL;
 
-	while( (b = get_next_box(fd)) != NULL ) {
+	while( (b = get_next_box(src_buff)) != NULL ) {
 		if(hex_to_long(b->tbox, 4) == JP2_HEADER_BOX) {
 			println(INFO, "Header Box");
 			h_header_box(b,img);

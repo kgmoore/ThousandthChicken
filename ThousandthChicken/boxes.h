@@ -79,9 +79,8 @@ typedef struct _box {
 	unsigned long int read; ///how many bytes have been read from the content of the box
 } box;
 
-//box *get_next_box(unsigned char *mem, long int *pos);
-box *get_next_box(FILE *fd);
-int jp2_parse_boxes(FILE *fd, type_image *img);
+box *get_next_box(type_buffer* buffer);
+int jp2_parse_boxes(type_buffer* buffer, type_image *img);
 
 
 #ifdef __cplusplus

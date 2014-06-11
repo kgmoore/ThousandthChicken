@@ -17,6 +17,7 @@ public:
 	Decoder(ocl_args_d_t* ocl);
 	~Decoder(void);
 	int decode(std::string fileName);
+	void parsedCodeBlock(type_codeblock* cblk, unsigned char* codestream);
 private:
 
 	ocl_args_d_t* _ocl;

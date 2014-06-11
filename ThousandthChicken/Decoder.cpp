@@ -15,6 +15,16 @@
 #include "codestream.h"
 #include "basic.h"
 #include <time.h>
+#include "MemoryMapped.h"
+
+
+Decoder* decoder = NULL;
+
+void handleCodeBlock(type_codeblock* cblk, unsigned char* codestream) {
+	if (decoder)
+		decoder->parsedCodeBlock(cblk, codestream);
+
+}
 
 
 
@@ -29,6 +39,8 @@ Decoder::Decoder(ocl_args_d_t* ocl) : _ocl(ocl),
 	quantizer = new Quantizer(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/""));
 	dwt = new DWT(KernelInitInfoBase(_ocl->commandQueue, ""));
 	preprocessor = new Preprocessor(KernelInitInfoBase(_ocl->commandQueue, ""));
+
+	codeBlockCallback = handleCodeBlock;
 }
 
 
@@ -61,19 +73,39 @@ void init_dec_buffer(FILE *fsrc, type_buffer *src_buff) {
 	src_buff->byte = 0;
 }
 
+void Decoder::parsedCodeBlock(type_codeblock* cblk, unsigned char* codestream) {
+	cl_uint dev_alignment = requiredOpenCLAlignment(_ocl->device);
+	cblk->codestream = (unsigned char*)aligned_malloc(cblk->length, dev_alignment);
+	memcpy(cblk->codestream, codestream, cblk->length);
+}
+
 
 int Decoder::decode(std::string fileName)
 {
+	decoder = this;
+
 	double t1 = time_stamp();
 
 	type_image *img = (type_image *)malloc(sizeof(type_image));
 	memset(img, 0, sizeof(type_image));
 	img->in_file = fileName.c_str();
-	FILE *fsrc = fopen(img->in_file, "rb");
-	if (!fsrc) {
-		fprintf(stderr, "Error, failed to open %s for reading\n", img->in_file);
-		return 1;
+	
+	// map file to memory
+	MemoryMapped data(fileName, MemoryMapped::WholeFile, MemoryMapped::SequentialScan);
+	if (!data.isValid())
+	{
+	printf("File not found\n");
+	return -2;
 	}
+
+  // raw pointer to mapped memory
+    unsigned char* buffer = (unsigned char*)data.getData();
+
+	type_buffer *src_buff = (type_buffer *) malloc(sizeof(type_buffer));
+	memset(src_buff, 0, sizeof(type_buffer));
+	src_buff->data = buffer;
+	src_buff->bp = buffer;
+	src_buff->size = data.size();
 
 	type_tile *tile;
 	unsigned int i,j;
@@ -81,8 +113,7 @@ int Decoder::decode(std::string fileName)
 		println(INFO, "It's a JP2 file");
 
 		//parse the JP2 boxes
-		jp2_parse_boxes(fsrc, img);
-		fclose(fsrc);
+		jp2_parse_boxes(src_buff, img);
 
 		for (i = 0; i < img->num_tiles; i++) {
 			type_tile* tile = img->tile + i;
@@ -100,11 +131,13 @@ int Decoder::decode(std::string fileName)
 			}
 		}
 	} else {
+		/*
 		type_buffer *src_buff = (type_buffer *) malloc(sizeof(type_buffer));
 		init_dec_buffer(fsrc, src_buff);
 		fclose(fsrc);
 		decode_codestream(src_buff, img);
 		free(src_buff);
+		*/
 	}
 
 	// Do decoding for all tiles

@@ -9,6 +9,11 @@ extern "C" {
 #include "codestream_image_types.h"
 #include "io_buffered_stream.h"
 
+typedef void (*CodeBlockCallback)(type_codeblock* cblk, unsigned char* codestream);
+
+extern CodeBlockCallback codeBlockCallback;
+
+
 /** Packet parameters */
 typedef struct _type_packet{
 	unsigned short *inclusion;
