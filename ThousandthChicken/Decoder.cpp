@@ -36,7 +36,7 @@ Decoder::Decoder(ocl_args_d_t* ocl) : _ocl(ocl),
 									  preprocessor(NULL)
 {
 	coder = new  CoefficientCoder(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\coefficient_coder.cl\""*/""));
-	quantizer = new Quantizer(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/""));
+//	quantizer = new Quantizer(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/""));
 	dwt = new DWT(KernelInitInfoBase(_ocl->commandQueue, ""));
 	preprocessor = new Preprocessor(KernelInitInfoBase(_ocl->commandQueue, ""));
 
@@ -71,6 +71,10 @@ void Decoder::parsedCodeBlock(type_codeblock* cblk, unsigned char* codestream) {
 	cl_uint dev_alignment = requiredOpenCLAlignment(_ocl->device);
 	cblk->codestream = (unsigned char*)aligned_malloc(cblk->length, dev_alignment);
 	memcpy(cblk->codestream, codestream, cblk->length);
+
+	//1. enqueue write to device memory
+
+	//2. when enough codeblocks have been parsed, launch kernel
 }
 
 
@@ -166,7 +170,8 @@ int Decoder::decode(std::string fileName)
 	
 	free_image(img);
 	double t2 = time_stamp();
-	println_var(INFO, "Decode time: %d ms ", (int)((t2 - t1)*1000));
-	scanf("Press any key to exit");
+	int diff =  (int)((t2 - t1)*1000);
+	printf("Decode time: %d ms ",diff);
+	scanf("%d");
 	return 0;
 }

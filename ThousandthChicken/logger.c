@@ -6,13 +6,16 @@
 
 void println(const char* file, const char* function, const int line, const char *str)
 {
+	/*
 	time_t timer;
-    time(&timer);  /* get current time; same as: timer = time(NULL)  */
+    time(&timer);  // get current time; same as: timer = time(NULL)  
 	fprintf(stdout, "[%s] (%s:%d) %s\n", function, file, line, str);
+	*/
 }
 
 void println_var(const char* file, const char* function, const int line, const char* format, ...)
 {
+	/*
 	char status[512];
 	va_list arglist;
 
@@ -21,6 +24,7 @@ void println_var(const char* file, const char* function, const int line, const c
 	va_end(arglist);
 
 	println(file, function, line, status);
+	*/
 }
 
 void println_start(const char* file, const char* function, const int line)
