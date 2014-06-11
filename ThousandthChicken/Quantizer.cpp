@@ -30,7 +30,6 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 	type_res_lvl *res_lvl = sb->parent_res_lvl;
 	type_tile_comp *tile_comp = res_lvl->parent_tile_comp;
 	type_image *img = tile_comp->parent_tile->parent_img;
-	float convert_factor;
 	int shift_bits;
 	int max_res_lvl;
 	unsigned int i;
@@ -41,13 +40,11 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 		/* Max resolution level */
 		max_res_lvl = tile_comp->num_dlvls;
 		/* Relative de-quantization step size. Step size is signaled relative to the wavelet coefficient bit depth. */
-		convert_factor = sb->step_size
+		sb->convert_factor = sb->step_size
 				* ((type_data)(1 << (img->num_range_bits + get_exp_subband_gain(sb->orient) + max_res_lvl - res_lvl->dec_lvl_no)));
 		shift_bits = 31 - sb->mag_bits;
 
-		convert_factor = convert_factor / ((type_data)(1 << shift_bits));
-
-		sb->convert_factor = convert_factor;
+		sb->convert_factor /= ((type_data)(1 << shift_bits));
 
 //		println_var(INFO, "Lossy mag_bits:%d convert_factor:%0.16f shift_bits:%d step_size:%f subband_gain:%d", sb->mag_bits, /*sb->step_size
 //				* ((type_data)(1 << (img->num_range_bits + get_exp_subband_gain(sb->orient) + max_res_lvl - res_lvl->dec_lvl_no)))*/sb->convert_factor, shift_bits, sb->step_size, get_exp_subband_gain(sb->orient));
