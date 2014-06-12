@@ -33,13 +33,14 @@ Decoder::Decoder(ocl_args_d_t* ocl) : _ocl(ocl),
 	                                  coder(NULL),
 									  quantizer(NULL),
 									  dwt(NULL),
-									  preprocessor(NULL)
+									  preprocessor(NULL),
+									  dev_alignment(128)
 {
 	coder = new  CoefficientCoder(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\coefficient_coder.cl\""*/""));
 //	quantizer = new Quantizer(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/""));
 	dwt = new DWT(KernelInitInfoBase(_ocl->commandQueue, ""));
 	preprocessor = new Preprocessor(KernelInitInfoBase(_ocl->commandQueue, ""));
-
+	dev_alignment = requiredOpenCLAlignment(_ocl->device);
 	codeBlockCallback = handleCodeBlock;
 }
 
@@ -68,7 +69,7 @@ void init_dec_buffer(unsigned char* data, unsigned long int dataLength, type_buf
 }
 
 void Decoder::parsedCodeBlock(type_codeblock* cblk, unsigned char* codestream) {
-	cl_uint dev_alignment = requiredOpenCLAlignment(_ocl->device);
+
 	cblk->codestream = (unsigned char*)aligned_malloc(cblk->length, dev_alignment);
 	memcpy(cblk->codestream, codestream, cblk->length);
 
@@ -82,7 +83,7 @@ int Decoder::decode(std::string fileName)
 {
 	decoder = this;
 
-	double t1 = time_stamp();
+
 
 	type_image *img = (type_image *)malloc(sizeof(type_image));
 	memset(img, 0, sizeof(type_image));
@@ -105,6 +106,7 @@ int Decoder::decode(std::string fileName)
 	src_buff->bp = buffer;
 	src_buff->size = data.size();
 
+	double t1 = time_stamp();
 	type_tile *tile;
 	unsigned int i,j;
 	if(strstr(img->in_file, ".jp2") != NULL) {

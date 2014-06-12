@@ -26,6 +26,8 @@ private:
 	DWT* dwt;
 	Preprocessor* preprocessor;
 
+	cl_uint dev_alignment ;
+
 
 };
 
