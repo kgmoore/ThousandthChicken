@@ -37,7 +37,7 @@ Decoder::Decoder(ocl_args_d_t* ocl) : _ocl(ocl),
 									  dev_alignment(128)
 {
 	coder = new  CoefficientCoder(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\coefficient_coder.cl\""*/""));
-//	quantizer = new Quantizer(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/""));
+	quantizer = new Quantizer(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/""));
 	dwt = new DWT(KernelInitInfoBase(_ocl->commandQueue, ""));
 	preprocessor = new Preprocessor(KernelInitInfoBase(_ocl->commandQueue, ""));
 	dev_alignment = requiredOpenCLAlignment(_ocl->device);
@@ -78,13 +78,22 @@ void Decoder::parsedCodeBlock(type_codeblock* cblk, unsigned char* codestream) {
 	//2. when enough codeblocks have been parsed, launch kernel
 }
 
+cl_int Decoder::mapComponentToHost(type_tile_comp* tile_comp){
+		
+	cl_int error_code = CL_SUCCESS;
+	tile_comp->img_data_h = clEnqueueMapBuffer(_ocl->commandQueue, (cl_mem)tile_comp->img_data_d, true, CL_MAP_READ, 
+		                                0, tile_comp->width * tile_comp->height * sizeof(int), 0, NULL, NULL, &error_code);
+    if (CL_SUCCESS != error_code)
+    {
+        LogError("Error: clEnqueueMapBuffer return %s.\n", TranslateOpenCLError(error_code));
+    }
+	return error_code;
+}
+
 
 int Decoder::decode(std::string fileName)
 {
 	decoder = this;
-
-
-
 	type_image *img = (type_image *)malloc(sizeof(type_image));
 	memset(img, 0, sizeof(type_image));
 	img->in_file = fileName.c_str();
@@ -123,6 +132,7 @@ int Decoder::decode(std::string fileName)
 				
 				//allocate image tile component memory on device 
 				cl_int err = CL_SUCCESS;
+				tile_comp->img_data_h = NULL;
 				tile_comp->img_data_d = (void*)clCreateBuffer(_ocl->context, CL_MEM_READ_WRITE, tile_comp->width * tile_comp->height * sizeof(int), NULL, &err);
 				SAMPLE_CHECK_ERRORS(err);
 				if (tile_comp->img_data_d  == 0)
@@ -167,13 +177,41 @@ int Decoder::decode(std::string fileName)
 				preprocessor->idc_level_shifting(img);
 			}
 		}
-
 	}
-	
-	free_image(img);
+
+	clFinish(_ocl->commandQueue);
+	//map component memory from device to host
+	for (i = 0; i < img->num_tiles; i++) {
+		type_tile* tile = img->tile + i;
+		for (j = 0; j < tile->parent_img->num_components; j++) {
+			    mapComponentToHost( tile->tile_comp + j);
+		}
+	}
+
 	double t2 = time_stamp();
 	int diff =  (int)((t2 - t1)*1000);
 	printf("Decode time: %d ms ",diff);
+
+	//release tile component device memory
+	cl_int error_code = CL_SUCCESS;
+	for (i = 0; i < img->num_tiles; i++) {
+		type_tile* tile = img->tile + i;
+		for (j = 0; j < tile->parent_img->num_components; j++) {
+			type_tile_comp* comp = tile->tile_comp + j;
+			error_code = clEnqueueUnmapMemObject(_ocl->commandQueue,(cl_mem)comp->img_data_d, comp->img_data_h,0,NULL,NULL);
+			if (CL_SUCCESS != error_code)
+			{
+				LogError("Error: clEnqueueUnmapMemObject return %s.\n", TranslateOpenCLError(error_code));
+			}
+			error_code = clReleaseMemObject((cl_mem)comp->img_data_d);
+			if (CL_SUCCESS != error_code)
+			{
+				LogError("Error: clReleaseMemObject return %s.\n", TranslateOpenCLError(error_code));
+			}
+		}
+	}
+
+	free_image(img);
 	scanf("%d");
 	return 0;
 }

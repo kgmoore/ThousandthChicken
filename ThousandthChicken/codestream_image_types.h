@@ -126,6 +126,8 @@ struct type_subband
 	/** Convert factor to quantize data */
 	type_data convert_factor;
 
+	int shift_bits;
+
 	/** Parent resolution-level */
 	type_res_lvl *parent_res_lvl;
 
@@ -238,6 +240,9 @@ struct type_tile_comp
 
 	/** Tile component data on the GPU */
 	void* img_data_d;
+
+	/** Tile component data on the host */
+	void* img_data_h;
 
 	/** Resolution levels */
 	type_res_lvl *res_lvls;

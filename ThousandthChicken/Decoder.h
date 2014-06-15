@@ -27,6 +27,7 @@ private:
 	Preprocessor* preprocessor;
 
 	cl_uint dev_alignment ;
+	cl_int mapComponentToHost(type_tile_comp* tile_comp);
 
 
 };

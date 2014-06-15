@@ -134,12 +134,12 @@ void Preprocessor::dc_level_shifting(type_image *img, int sign)
 			if(sign < 0)
 			{
 				setDCShiftKernelArgs<int>(dcShift,idata, tile->width, tile->height, level_shift);
-    			ict->execute(1,global_work_size, local_work_size);
+    			ict->enqueue(1,global_work_size, local_work_size);
 
 			} else
 			{
 				setDCShiftInverseKernelArgs<int>(dcShiftInverse,idata, tile->width, tile->height, level_shift, min, max);
-				ictInverse->execute(1,global_work_size, local_work_size);
+				ictInverse->enqueue(1,global_work_size, local_work_size);
 
 			}
 		}
