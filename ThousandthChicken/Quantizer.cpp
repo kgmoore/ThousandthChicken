@@ -87,7 +87,7 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 	    // copy decoded coefficients from code block device memory to sub band code block device memory
 		size_t bufferOffset[] = { 0, 0};
 	   // The region size must be given in bytes
-		size_t region[] = { cblk->width * sizeof(int), cblk->height * sizeof(int) };
+		size_t region[] = { cblk->width * sizeof(int), cblk->height};
 
 		clEnqueueCopyBufferRect ( initInfo.cmd_queue, 	//copy command will be queued
    					  (cl_mem)(d_coefficients + cblk->d_coefficientsOffset),		
