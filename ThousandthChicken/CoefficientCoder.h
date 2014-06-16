@@ -11,6 +11,8 @@
 #define HL_SUBBAND		1
 #define HH_SUBBAND		2
 
+typedef struct _CodeBlockAdditionalInfo CodeBlockAdditionalInfo;
+
 
 typedef struct
 {
@@ -40,9 +42,17 @@ public:
 	virtual ~CoefficientCoder(void);
 	void decode_tile(type_tile *tile);
 private:
-	float gpuDecode(EntropyCodingTaskInfo *infos, int count, void** coefficients);
+	void decodeInit(EntropyCodingTaskInfo *infos, int count, void** coefficients);
+	float decode(EntropyCodingTaskInfo *infos, int count, void** coefficients);
 	void convert_to_decoding_task(EntropyCodingTaskInfo &task, type_codeblock &cblk, int& offset);
 	void extract_cblks(type_tile *tile, std::list<type_codeblock *> &out_cblks);
+
+	unsigned char* h_codestreamBuffers;
+	CodeBlockAdditionalInfo *h_infos;
+	cl_mem d_decodedCoefficientsBuffers ;
+	cl_mem d_codestreamBuffers;
+	cl_mem d_stBuffers;
+	cl_mem d_infos;
 
 };
 

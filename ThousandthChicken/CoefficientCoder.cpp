@@ -21,13 +21,41 @@ using namespace std;
 
 
 CoefficientCoder::CoefficientCoder(KernelInitInfoBase initInfo) : 
-						DeviceKernel( KernelInitInfo(initInfo, "coefficient_coder.cl", "g_decode") )
+						DeviceKernel( KernelInitInfo(initInfo, "coefficient_coder.cl", "g_decode") ),
+						h_codestreamBuffers(NULL),
+	                    h_infos(NULL),
+						 d_decodedCoefficientsBuffers(0),
+						 d_codestreamBuffers(0),
+						 d_stBuffers(0),
+						 d_infos(0)
+
 {
 }
 
 
 CoefficientCoder::~CoefficientCoder(void)
 {
+	if (d_infos) {
+		cl_int err = clReleaseMemObject(d_infos);
+		SAMPLE_CHECK_ERRORS(err);
+	}
+
+	if (d_stBuffers) {
+		cl_int err = clReleaseMemObject(d_stBuffers);
+		SAMPLE_CHECK_ERRORS(err);
+
+	}
+
+	if (d_codestreamBuffers) {
+		cl_int err = clReleaseMemObject(d_codestreamBuffers);
+		SAMPLE_CHECK_ERRORS(err);
+
+	}
+
+	if (h_infos)
+	   aligned_free(h_infos);
+	if (h_codestreamBuffers)
+	   aligned_free(h_codestreamBuffers);
 }
 
 
@@ -50,8 +78,8 @@ void CoefficientCoder::decode_tile(type_tile *tile)
 	}
 
 //	printf("%d\n", num_tasks);
-
-	float t = gpuDecode(tasks, num_tasks, &tile->coefficients);
+	decodeInit(tasks, num_tasks, &tile->coefficients);
+	float t = decode(tasks, num_tasks, &tile->coefficients);
 
 	printf("coefficient decoder kernel consumption: %f ms\n", t);
 	free(tasks);
@@ -108,7 +136,8 @@ void CoefficientCoder::convert_to_decoding_task(EntropyCodingTaskInfo &task, typ
 	task.significantBits = cblk.significant_bits;
 }
 
-float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void** coefficients)
+
+void CoefficientCoder::decodeInit(EntropyCodingTaskInfo *infos, int count, void** coefficients)
 {
     cl_int err = CL_SUCCESS;
 
@@ -119,13 +148,13 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 	cl_uint dev_alignment = requiredOpenCLAlignment(device);
 
 	// allocate codestream buffer on host
-	unsigned char* h_codestreamBuffers = (unsigned char*)aligned_malloc(codeBlocks * maxOutLength,dev_alignment);
+	h_codestreamBuffers = (unsigned char*)aligned_malloc(codeBlocks * maxOutLength,dev_alignment);
     if (h_codestreamBuffers == NULL)
         throw Error("Failed to create h_codestreamBuffer Buffer!");
 
 
 	// allocate h_infos on host
-	CodeBlockAdditionalInfo *h_infos = (CodeBlockAdditionalInfo *) aligned_malloc(sizeof(CodeBlockAdditionalInfo) * codeBlocks,dev_alignment);
+	h_infos = (CodeBlockAdditionalInfo *) aligned_malloc(sizeof(CodeBlockAdditionalInfo) * codeBlocks,dev_alignment);
 	   if (h_infos == NULL)
         throw Error("Failed to create h_infos Buffer!");
 
@@ -153,19 +182,19 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 	}
 
 	//allocate d_coefficients on device
-	cl_mem d_decodedCoefficientsBuffers = clCreateBuffer(context, CL_MEM_READ_WRITE ,  sizeof(int) * coefficientsOffset, NULL, &err);
+	d_decodedCoefficientsBuffers = clCreateBuffer(context, CL_MEM_READ_WRITE ,  sizeof(int) * coefficientsOffset, NULL, &err);
     SAMPLE_CHECK_ERRORS(err);
     if (d_decodedCoefficientsBuffers == (cl_mem)0)
         throw Error("Failed to create d_decodedCoefficientsBuffers Buffer!");
 
 	//allocate d_codestreamBuffer on device and pin to host memory
-	cl_mem d_codestreamBuffers = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, codeBlocks * maxOutLength, h_codestreamBuffers, &err);
+	d_codestreamBuffers = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, codeBlocks * maxOutLength, h_codestreamBuffers, &err);
     SAMPLE_CHECK_ERRORS(err);
     if (d_codestreamBuffers == (cl_mem)0)
         throw Error("Failed to create d_codestreamBuffers Buffer!");
 
 	//allocate d_stBuffers on device and initialize it to zero
-	cl_mem d_stBuffers = clCreateBuffer(context, CL_MEM_READ_WRITE ,  sizeof(unsigned int) * magconOffset, NULL, &err);
+	d_stBuffers = clCreateBuffer(context, CL_MEM_READ_WRITE ,  sizeof(unsigned int) * magconOffset, NULL, &err);
     SAMPLE_CHECK_ERRORS(err);
     if (d_stBuffers == (cl_mem)0)
         throw Error("Failed to create d_infos Buffer!");
@@ -173,14 +202,22 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 	clEnqueueFillBuffer(queue, d_stBuffers, &pattern, sizeof(cl_int), 0, sizeof(unsigned int) * magconOffset, 0, NULL, NULL);
 
     //allocate d_infos on device and pin to host memory
-	cl_mem d_infos = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,  sizeof(CodeBlockAdditionalInfo) * codeBlocks, h_infos, &err);
+	d_infos = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,  sizeof(CodeBlockAdditionalInfo) * codeBlocks, h_infos, &err);
     SAMPLE_CHECK_ERRORS(err);
     if (d_infos == (cl_mem)0)
         throw Error("Failed to create d_infos Buffer!");
 
+	*coefficients = d_decodedCoefficientsBuffers;
 
-	/////////////////////////////////////////////////////////////////////////////
-	// set kernel arguments ///////////////////////////////
+}
+
+float CoefficientCoder::decode(EntropyCodingTaskInfo *infos, int count, void** coefficients)
+{
+    cl_int err = CL_SUCCESS;
+
+	int codeBlocks = count;
+	int maxOutLength = MAX_CODESTREAM_SIZE;
+
 	int argNum = 0;
 	err = clSetKernelArg(myKernel, argNum++, sizeof(cl_mem),  &d_stBuffers);
     SAMPLE_CHECK_ERRORS(err);
@@ -200,10 +237,6 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 	err = clSetKernelArg(myKernel, argNum++, sizeof(cl_mem), &d_decodedCoefficientsBuffers);
     SAMPLE_CHECK_ERRORS(err);
 
-	//////////////////////////////////////////////////////////////////////////////////
-		
-	/////////////////////////////
-	// execute kernel
 	double t1 = time_stamp();
 	const int THREADS = 16;
 	int groups = (int) ceil((float) codeBlocks / THREADS);
@@ -211,27 +244,10 @@ float CoefficientCoder::gpuDecode(EntropyCodingTaskInfo *infos, int count, void*
 	size_t global_work_size[1] = {groups * THREADS};
 	size_t local_work_size[1] = {THREADS};
     // execute kernel
-	err =  execute(1, global_work_size, local_work_size); 
+	err =  enqueue(1, global_work_size, local_work_size); 
     SAMPLE_CHECK_ERRORS(err);
 
 	double t2 = time_stamp();
-
-    //////////////////////////////////////////
-    //release memory
-
-	 err = clReleaseMemObject(d_infos);
-    SAMPLE_CHECK_ERRORS(err);
-
-	err = clReleaseMemObject(d_stBuffers);
-    SAMPLE_CHECK_ERRORS(err);
-		
-	err = clReleaseMemObject(d_codestreamBuffers);
-    SAMPLE_CHECK_ERRORS(err);
-
-	*coefficients = d_decodedCoefficientsBuffers;
-
-	aligned_free(h_infos);
-	aligned_free(h_codestreamBuffers);
 	return (t2 - t1)* 1000;
 
 }
