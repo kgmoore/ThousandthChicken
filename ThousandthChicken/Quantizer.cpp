@@ -25,7 +25,7 @@ Quantizer::~Quantizer(void)
 
 
 
-type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
+tDeviceRC Quantizer::dequantizationInit(type_subband *sb, void* coefficients)
 {
 	type_res_lvl *res_lvl = sb->parent_res_lvl;
 	type_tile_comp *tile_comp = res_lvl->parent_tile_comp;
@@ -64,7 +64,7 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 	if (CL_SUCCESS != err)
 	{
 		LogError("Error: clGetCommandQueueInfo (CL_QUEUE_CONTEXT) returned %s.\n", TranslateOpenCLError(err));
-		return 0;
+		return err;
 	}
 
 	//allocate device memory for coefficient data for all codeblocks from this sub band
@@ -75,6 +75,7 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 
 	//printf("%d %d %d\n", sb->num_cblks, tile_comp->cblk_w, tile_comp->cblk_h);
 
+	
 	int* d_coefficients = (int*)coefficients;
 	// fill subband coefficients buffer
 	for (i = 0; i < sb->num_cblks; i++)
@@ -85,15 +86,16 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 		//printf("%d %d %d %d %d %d %d\n", cblk->tlx, cblk->tly, cblk->width, cblk->height, sb->width, sb->height, cblk->tlx + cblk->tly * sb->width);
 
 	    // copy decoded coefficients from code block device memory to sub band code block device memory
-		size_t bufferOffset[] = { 0, 0};
+		size_t bufferOffsetSrc[] = { cblk->d_coefficientsOffset * sizeof(int), 0,0};
+	    size_t bufferOffsetDst[] = { cblk->tlx * sizeof(int), cblk->tly,0};
 	   // The region size must be given in bytes
-		size_t region[] = { cblk->width * sizeof(int), cblk->height};
-
-		clEnqueueCopyBufferRect ( initInfo.cmd_queue, 	//copy command will be queued
-   					  (cl_mem)(d_coefficients + cblk->d_coefficientsOffset),		
-   					  (cl_mem)((int*)d_subbandCodeblockCoefficients + cblk->tlx + cblk->tly * sb->width),		
-					  bufferOffset,	//offset associated with src_buffer
-					  bufferOffset,     //offset associated with src_buffer
+		size_t region[] = { cblk->width * sizeof(int), cblk->height,1};
+		/*
+		err = clEnqueueCopyBufferRect ( initInfo.cmd_queue, 	//copy command will be queued
+   					  (cl_mem)(d_coefficients),		
+   					  d_subbandCodeblockCoefficients,		
+					  bufferOffsetSrc,	//offset associated with src_buffer
+					  bufferOffsetDst,     //offset associated with src_buffer
 					  region,		//(width, height, depth) in bytes of the 2D or 3D rectangle being copied
 					  tile_comp->cblk_w * sizeof(int),   //length of each row in bytes
 					  0, //length of each 2D slice in bytes 
@@ -102,43 +104,58 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
 					  0,
 					  NULL,
 					  NULL);
+		if (CL_SUCCESS != err)
+		{
+			LogError("Error: clEnqueueCopyBufferRect (srcMem) returned %s.\n", TranslateOpenCLError(err));
+		}*/
+		return CL_SUCCESS;
 				  
 	}
+	return DeviceSuccess;
+}
 
+
+
+
+type_subband* Quantizer::dequantization(type_subband *sb, void** coefficients)
+{
+	type_res_lvl *res_lvl = sb->parent_res_lvl;
+	type_tile_comp *tile_comp = res_lvl->parent_tile_comp;
 	int odataOffset = sb->tlx + sb->tly * tile_comp->width;
 
 	cl_int2 isize = {sb->width, sb->height};
 	cl_int2 osize = {tile_comp->width, tile_comp->height};
 	cl_int2 cblk_size = {tile_comp->cblk_w, tile_comp->cblk_h};
 
+	type_image *img = tile_comp->parent_tile->parent_img;
 	DeviceKernel* quant = img->wavelet_type ? lossyKernel : losslessKernel;
 	cl_kernel quantKernel =  quant->getKernel();
 
 	/////////////////////////////////////
 	//set kernel arguments
 	int argNum = 0;
-	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_mem), (void *) &tile_comp->img_data_d);
+	tDeviceRC err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_mem), coefficients);
     SAMPLE_CHECK_ERRORS(err);
 	
-	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_int2), (void *) &isize);
+	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_int2),  &isize);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_mem), (void *)&tile_comp->img_data_d);
+	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_mem), &tile_comp->img_data_d);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(quantKernel, argNum++, sizeof(int), (void *)&odataOffset);
+	err = clSetKernelArg(quantKernel, argNum++, sizeof(int), &odataOffset);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_int2), (void *) &osize);
+	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_int2), &osize);
     SAMPLE_CHECK_ERRORS(err);
 
-	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_int2), (void *) &cblk_size);
+	err = clSetKernelArg(quantKernel, argNum++, sizeof(cl_int2),  &cblk_size);
     SAMPLE_CHECK_ERRORS(err);
 
 	if (img->wavelet_type) {
-		err = clSetKernelArg(quantKernel, argNum++, sizeof(float), (void *) &sb->convert_factor);
+		err = clSetKernelArg(quantKernel, argNum++, sizeof(float),  &sb->convert_factor);
 	} else {
-		err = clSetKernelArg(quantKernel, argNum++, sizeof(int), (void *) &sb->shift_bits);
+		err = clSetKernelArg(quantKernel, argNum++, sizeof(int),  &sb->shift_bits);
 	}
 	 SAMPLE_CHECK_ERRORS(err);
 
@@ -163,34 +180,39 @@ type_subband* Quantizer::dequantization(type_subband *sb, void* coefficients)
  */
 void Quantizer::dequantize_tile(type_tile *tile)
 {
-	//	println_start(INFO);
-
 	type_image *img = tile->parent_img;
-	type_tile_comp *tile_comp;
-	type_res_lvl *res_lvl;
-	type_subband *sb;
-	int i, j, k;
-
-	for (i = 0; i < img->num_components; i++)
+	for (int i = 0; i < img->num_components; i++)
 	{
-		tile_comp = &(tile->tile_comp[i]);
-		for (j = 0; j < tile_comp->num_rlvls; j++)
+		type_tile_comp *tile_comp = tile->tile_comp + i;
+		for (int j = 0; j < tile_comp->num_rlvls; j++)
 		{
-			res_lvl = &(tile_comp->res_lvls[j]);
-			for (k = 0; k < res_lvl->num_subbands; k++)
+			type_res_lvl *res_lvl = tile_comp->res_lvls + j;
+			for (int k = 0; k < res_lvl->num_subbands; k++)
 			{
-				sb = &(res_lvl->subbands[k]);
-				dequantization(sb, tile->coefficients);
+				type_subband *sb = res_lvl->subbands + k;
+				if (dequantizationInit(sb, tile->coefficients) != DeviceSuccess)
+					return;
 			}
 		}
 	}
-
+	clFinish(initInfo.cmd_queue);
+	for (int i = 0; i < img->num_components; i++)
+	{
+		type_tile_comp *tile_comp = tile->tile_comp + i;
+		for (int j = 0; j < tile_comp->num_rlvls; j++)
+		{
+			type_res_lvl *res_lvl = tile_comp->res_lvls + j;
+			for (int k = 0; k < res_lvl->num_subbands; k++)
+			{
+				type_subband *sb = res_lvl->subbands + k;
+				dequantization(sb, &tile->coefficients);
+			}
+		}
+	}
 	//release decoded coefficients buffer
 	//TODO: release memory when finished dequant
 	//cl_int err = clReleaseMemObject((cl_mem)tile->coefficients);
     //SAMPLE_CHECK_ERRORS(err);
-
-	//	println_end(INFO);
 }
 
 /**

@@ -247,6 +247,7 @@ void h_contiguous_codestream_box(box *cbox, type_image *img) {
 	long int codestream_len = cbox->content_length;
 
 	type_buffer *src_buff = (type_buffer *) malloc(sizeof(type_buffer));
+	memset(src_buff, 0, sizeof(type_buffer));
 	src_buff->size = codestream_len;
 	src_buff->data = cbox->dbox;
 	src_buff->start = src_buff->data;

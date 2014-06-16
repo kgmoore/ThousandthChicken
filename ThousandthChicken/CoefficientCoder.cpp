@@ -43,9 +43,10 @@ void CoefficientCoder::decode_tile(type_tile *tile)
 	std::list<type_codeblock *>::iterator ii = cblks.begin();
 
 	int num_tasks = 0;
+	int offset = 0;
 	for(; ii != cblks.end(); ++ii)
 	{
-		convert_to_decoding_task(tasks[num_tasks++], *(*ii));
+		convert_to_decoding_task(tasks[num_tasks++], *(*ii),offset);
 	}
 
 //	printf("%d\n", num_tasks);
@@ -75,7 +76,7 @@ void CoefficientCoder::extract_cblks(type_tile *tile, std::list<type_codeblock *
 		}
 	}
 }
-void CoefficientCoder::convert_to_decoding_task(EntropyCodingTaskInfo &task, type_codeblock &cblk)
+void CoefficientCoder::convert_to_decoding_task(EntropyCodingTaskInfo &task, type_codeblock &cblk, int& offset)
 {
 	switch(cblk.parent_sb->orient)
 	{
@@ -97,7 +98,8 @@ void CoefficientCoder::convert_to_decoding_task(EntropyCodingTaskInfo &task, typ
 	task.nominalWidth = cblk.parent_sb->parent_res_lvl->parent_tile_comp->cblk_w;
 	task.nominalHeight = cblk.parent_sb->parent_res_lvl->parent_tile_comp->cblk_h;
 
-	cblk.d_coefficientsOffset = task.nominalWidth * task.nominalHeight;
+	cblk.d_coefficientsOffset = offset;
+	offset += task.nominalWidth * task.nominalHeight;
 
 	task.magbits = cblk.parent_sb->mag_bits;
 

@@ -3,6 +3,7 @@
 #include "codestream_tag_tree_encode.h"
 #include "logger.h"
 #include <stdlib.h>
+#include <string.h>
 
 
 void tag_tree_reset(type_tag_tree *tree)
@@ -32,6 +33,7 @@ type_tag_tree *tag_tree_create(int num_leafs_h, int num_leafs_v)
 	int n;
 
 	tree = (type_tag_tree *) malloc(sizeof(type_tag_tree));
+	memset(tree, 0, sizeof(type_tag_tree));
 	if (!tree) {
 		println_var(INFO, "Error: unable to allocate tag tree");
 		return NULL;

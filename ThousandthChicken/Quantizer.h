@@ -19,7 +19,8 @@ public:
 	void dequantize_tile(type_tile *tile);
 
 private:
-	type_subband* dequantization(type_subband *sb, void* coefficients);
+	type_subband* dequantization(type_subband *sb, void** coefficients);
+	tDeviceRC dequantizationInit(type_subband *sb, void* coefficients);
 	int get_exp_subband_gain(int orient);
 	KernelInitInfoBase initInfo;
 	DeviceKernel* lossyKernel;

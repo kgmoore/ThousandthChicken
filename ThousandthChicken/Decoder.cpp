@@ -36,10 +36,10 @@ Decoder::Decoder(ocl_args_d_t* ocl) : _ocl(ocl),
 									  preprocessor(NULL),
 									  dev_alignment(128)
 {
-	coder = new  CoefficientCoder(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\coefficient_coder.cl\""*/""));
-	quantizer = new Quantizer(KernelInitInfoBase(_ocl->commandQueue, /*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\quantizer.cl\""*/""));
-	dwt = new DWT(KernelInitInfoBase(_ocl->commandQueue, ""));
-	preprocessor = new Preprocessor(KernelInitInfoBase(_ocl->commandQueue, ""));
+	/*"-g -s \"c:\\src\\ThousandthChicken\\ThousandthChicken\\coefficient_coder.cl\""*/
+	coder = new  CoefficientCoder(KernelInitInfoBase(_ocl->commandQueue, "-I ./"));
+	quantizer = new Quantizer(KernelInitInfoBase(_ocl->commandQueue, "-I ./"));
+	preprocessor = new Preprocessor(KernelInitInfoBase(_ocl->commandQueue, "-I ./"));
 	dev_alignment = requiredOpenCLAlignment(_ocl->device);
 	codeBlockCallback = handleCodeBlock;
 }

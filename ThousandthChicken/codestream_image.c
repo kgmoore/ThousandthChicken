@@ -3,6 +3,7 @@
 #include "codestream_image.h"
 #include <stdlib.h>
 #include "config_parameters.h"
+#include <string.h>
 
 
 /**
@@ -17,6 +18,7 @@ void init_codeblocks(type_subband *sb) {
 	type_tile_comp *tile_comp;
 
 	sb->cblks = (type_codeblock *) malloc(sb->num_cblks * sizeof(type_codeblock));
+	memset(sb->cblks, 0, sb->num_cblks * sizeof(type_codeblock));
 
 	tile_comp = sb->parent_res_lvl->parent_tile_comp;
 
@@ -64,6 +66,8 @@ void init_subbands(type_res_lvl *res_lvl) {
 	unsigned short sb_ll_width, sb_ll_height;
 
 	res_lvl->subbands = (type_subband *) malloc(res_lvl->num_subbands * sizeof(type_subband));
+	memset(res_lvl->subbands, 0, res_lvl->num_subbands * sizeof(type_subband));
+
 
 	tile_comp = res_lvl->parent_tile_comp;
 	tile = tile_comp->parent_tile;
@@ -128,6 +132,8 @@ void init_resolution_lvls(type_tile_comp *tile_comp) {
 	/* Precinct width and height */
 	int prec_width, prec_height;
 	tile_comp->res_lvls = (type_res_lvl *) malloc(tile_comp->num_rlvls * sizeof(type_res_lvl));
+	memset(tile_comp->res_lvls, 0, tile_comp->num_rlvls *sizeof(type_res_lvl));
+
 
 	parent_tile = tile_comp->parent_tile;
 
@@ -187,6 +193,7 @@ void init_tile_comps(type_tile *tile, type_parameters *param) {
 
 	parent_img = tile->parent_img;
 	tile->tile_comp = (type_tile_comp *) malloc(parent_img->num_components * sizeof(type_tile_comp));
+	memset(tile->tile_comp, 0, parent_img->num_components * sizeof(type_tile_comp));
 
 	//	println_var(INFO, "no:%d tlx:%d tly:%d brx:%d bry:%d w:%d h:%d", tile->tile_no, tile->tlx, tile->tly, tile->brx, tile->bry, tile->width, tile->height);
 
@@ -221,9 +228,8 @@ void init_tile_comps(type_tile *tile, type_parameters *param) {
  *
  * @param _img Container in which tiles should be initialized in.
  */
-void init_tiles(type_image **_img, type_parameters *param) {
+void init_tiles(type_image *img, type_parameters *param) {
 	//	println_start(INFO);
-	type_image *img = *_img;
 	unsigned int i = 0;
 	/* Horizontal position of the tile */
 	unsigned short p;
@@ -233,8 +239,8 @@ void init_tiles(type_image **_img, type_parameters *param) {
 	type_tile *tile;
 
 	/* Checks if tile width and height are <= image width and height */
-	img->tile_h = (param->param_tile_h == -1U ? img->height : (param->param_tile_h <= img->height ?param->param_tile_h : img->height) ); ///Nominal tile height.
-	img->tile_w = (param->param_tile_w == -1U ? img->width : (param->param_tile_w <= img->width ? param->param_tile_w : img->width)); ///Nominal tile width.
+	img->tile_h = (param->param_tile_h == 0 ? img->height : (param->param_tile_h <= img->height ?param->param_tile_h : img->height) ); ///Nominal tile height.
+	img->tile_w = (param->param_tile_w == 0 ? img->width : (param->param_tile_w <= img->width ? param->param_tile_w : img->width)); ///Nominal tile width.
 	//println_var(INFO, "container->tile_h:%d container->tile_w:%d", container->tile_h, container->tile_w);
 
 	img->num_xtiles = (img->width + (img->tile_w - 1)) / img->tile_w;
@@ -243,6 +249,7 @@ void init_tiles(type_image **_img, type_parameters *param) {
 
 	//	cuda_h_allocate_mem((void **) &(img->tile), img->num_tiles * sizeof(type_tile));
 	img->tile = (type_tile *) malloc(img->num_tiles * sizeof(type_tile));
+	memset(img->tile, 0, img->num_tiles *sizeof(type_tile));
 
 	//	println_var(INFO, "w:%d h:%d no_com:%d area:%d t_w:%d t_h:%d t_x:%d t_y:%d no_t:%d", img->width,img->height,img->num_components,img->area_alloc,img->tile_w,img->tile_h,img->num_xtiles,img->num_ytiles,img->num_tiles);
 

@@ -30,6 +30,7 @@ void read_siz_marker(type_buffer *buffer, type_image *img)
 
 	/* Allocate coding parameters */
 	img->coding_param = (type_coding_param *) malloc(sizeof(type_coding_param));
+	memset(img->coding_param, 0, sizeof(type_coding_param));
 
 	/* Lsiz */
 	length = read_buffer(buffer, 2);
@@ -84,8 +85,10 @@ void read_siz_marker(type_buffer *buffer, type_image *img)
 void read_cod_marker(type_buffer *buffer, type_image *img)
 {
 	int length;
-	type_parameters *param = (type_parameters *)malloc(sizeof(type_parameters));
 	int marker;
+
+	type_parameters *param = (type_parameters *)malloc(sizeof(type_parameters));
+	memset(param, 0, sizeof(type_parameters));
 
 	/* Read COD marker */
 	marker = read_buffer(buffer, 2);
@@ -119,7 +122,7 @@ void read_cod_marker(type_buffer *buffer, type_image *img)
 	/* Wavelet transform */
 	img->wavelet_type = read_buffer(buffer, 1) == 0 ? DWT_97 : DWT_53;
 
-	init_tiles(&img, param);
+	init_tiles(img, param);
 	/* TODO: In future read precinct partition */
 
 	free(param);

@@ -5,7 +5,7 @@
 #include <list>
 #include "codestream_image.h"
 
-#define MAX_CODESTREAM_SIZE (4096 * 2) /// TODO: figure out
+#define MAX_CODESTREAM_SIZE (4096 * 4) /// TODO: figure out
 
 #define LL_LH_SUBBAND	0
 #define HL_SUBBAND		1
@@ -41,7 +41,7 @@ public:
 	void decode_tile(type_tile *tile);
 private:
 	float gpuDecode(EntropyCodingTaskInfo *infos, int count, void** coefficients);
-	void convert_to_decoding_task(EntropyCodingTaskInfo &task, type_codeblock &cblk);
+	void convert_to_decoding_task(EntropyCodingTaskInfo &task, type_codeblock &cblk, int& offset);
 	void extract_cblks(type_tile *tile, std::list<type_codeblock *> &out_cblks);
 
 };
