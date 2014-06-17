@@ -28,6 +28,7 @@ private:
 	DWTReverse53* r53;
 	DWTForward97* f97;
 	DWTReverse97* r97;
+	tDeviceMem  d_idata[256];
 
 };
 

@@ -87,7 +87,7 @@ int Preprocessor::color_trans_gpu(type_image *img, color_trans_type type) {
 
 			size_t local_work_size[3] = {64,1,1};
 			size_t global_work_size[3] = {tile->width * tile->height, 1,1};
-			targetKernel->execute(1,global_work_size, local_work_size);
+			targetKernel->enqueue(1,global_work_size, local_work_size);
 	}
 	return 0;
 }

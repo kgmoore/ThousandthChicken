@@ -1,13 +1,15 @@
 // License: please see LICENSE2 file for more details.
 
 #include "Quantizer.h"
+#include "quantizer_parameters.h"
 
 #include "codestream_image_types.h"
 #include "basic.h"
 
 
 Quantizer::Quantizer(KernelInitInfoBase initInfo)  : 
-	                    initInfo(initInfo)
+	                    initInfo(initInfo),
+						d_subbandCodeblockCoefficients(0)
 	                   
 {
 	 losslessKernel = new DeviceKernel( KernelInitInfo(initInfo, "quantizer_lossless_inverse.cl", "subband_dequantization_lossless") );
@@ -21,6 +23,13 @@ Quantizer::~Quantizer(void)
 		delete losslessKernel;
 	if (lossyKernel)
 		delete lossyKernel;
+
+	//release memory when finished dequant
+	if (d_subbandCodeblockCoefficients) {
+		cl_int err = clReleaseMemObject(d_subbandCodeblockCoefficients);
+	    SAMPLE_CHECK_ERRORS(err);
+	}
+
 }
 
 
@@ -68,7 +77,7 @@ tDeviceRC Quantizer::dequantizationInit(type_subband *sb, void* coefficients)
 	}
 
 	//allocate device memory for coefficient data for all codeblocks from this sub band
-	cl_mem d_subbandCodeblockCoefficients = clCreateBuffer(context, CL_MEM_READ_WRITE ,   sb->width * sb->height * sizeof(int), NULL, &err);
+	d_subbandCodeblockCoefficients = clCreateBuffer(context, CL_MEM_READ_WRITE ,   sb->width * sb->height * sizeof(int), NULL, &err);
     SAMPLE_CHECK_ERRORS(err);
     if (d_subbandCodeblockCoefficients == (cl_mem)0)
         throw Error("Failed to create d_decodedCoefficientsBuffers Buffer!");
@@ -90,7 +99,7 @@ tDeviceRC Quantizer::dequantizationInit(type_subband *sb, void* coefficients)
 	    size_t bufferOffsetDst[] = { cblk->tlx * sizeof(int), cblk->tly,0};
 	   // The region size must be given in bytes
 		size_t region[] = { cblk->width * sizeof(int), cblk->height,1};
-		/*
+		
 		err = clEnqueueCopyBufferRect ( initInfo.cmd_queue, 	//copy command will be queued
    					  (cl_mem)(d_coefficients),		
    					  d_subbandCodeblockCoefficients,		
@@ -107,15 +116,12 @@ tDeviceRC Quantizer::dequantizationInit(type_subband *sb, void* coefficients)
 		if (CL_SUCCESS != err)
 		{
 			LogError("Error: clEnqueueCopyBufferRect (srcMem) returned %s.\n", TranslateOpenCLError(err));
-		}*/
+		}
 		return CL_SUCCESS;
 				  
 	}
 	return DeviceSuccess;
 }
-
-
-
 
 type_subband* Quantizer::dequantization(type_subband *sb, void** coefficients)
 {
@@ -157,19 +163,13 @@ type_subband* Quantizer::dequantization(type_subband *sb, void** coefficients)
 	} else {
 		err = clSetKernelArg(quantKernel, argNum++, sizeof(int),  &sb->shift_bits);
 	}
-	 SAMPLE_CHECK_ERRORS(err);
-
-	/////////////////////////////////////////////////////////////////////////////////
+	SAMPLE_CHECK_ERRORS(err);
 
 	size_t global_work_size[3] = {sb->num_xcblks * BLOCKSIZEX,   sb->num_ycblks * BLOCKSIZEY,1};
 	size_t local_work_size[3] = {BLOCKSIZEX, BLOCKSIZEY,1};
     // execute kernel
 	quant->enqueue(2,global_work_size, local_work_size);
     SAMPLE_CHECK_ERRORS(err);
-
-	//TODO: release memory when finished dequant
-	//err = clReleaseMemObject(d_subbandCodeblockCoefficients);
-   // SAMPLE_CHECK_ERRORS(err);
 
 	return sb;
 }

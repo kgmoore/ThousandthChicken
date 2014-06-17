@@ -95,6 +95,7 @@
     <ClInclude Include="platform.h" />
     <ClInclude Include="Preprocessor.h" />
     <ClInclude Include="Quantizer.h" />
+    <ClInclude Include="quantizer_parameters.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E99F5DFC-113A-4BC3-8253-90A6AC0C9A9D}</ProjectGuid>

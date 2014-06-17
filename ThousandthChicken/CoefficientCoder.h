@@ -43,7 +43,7 @@ public:
 	void decode_tile(type_tile *tile);
 private:
 	void decodeInit(EntropyCodingTaskInfo *infos, int count, void** coefficients);
-	float decode(EntropyCodingTaskInfo *infos, int count, void** coefficients);
+	float decode(int codeBlocks);
 	void convert_to_decoding_task(EntropyCodingTaskInfo &task, type_codeblock &cblk, int& offset);
 	void extract_cblks(type_tile *tile, std::list<type_codeblock *> &out_cblks);
 

@@ -2,9 +2,7 @@
 
 #include "platform.cl"
 
-
-#define BLOCKSIZEX 16
-#define BLOCKSIZEY 16
+#include "quantizer_parameters.h"
 
 typedef float type_data;
 
@@ -30,7 +28,7 @@ KERNEL  void subband_dequantization_lossless(GLOBAL int *idata, int2 isize, GLOB
 	{
 		while (i < cblk_size.x && n < isize.x)
 		{
-			odata[out] = idata[in] >= 0 ? idata[in] >> shift_bits : -((idata[in] & 0x7FFFFFFF) >> shift_bits);
+			odata[out] = idata[in] >> shift_bits; //right shift will round towards zero
 			i += BLOCKSIZEX;
 			n = i +  getGroupId(0) * cblk_size.x;
 			in = n + m * isize.x;

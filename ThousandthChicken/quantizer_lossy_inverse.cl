@@ -2,9 +2,7 @@
 
 #include "platform.cl"
 
-
-#define BLOCKSIZEX 16
-#define BLOCKSIZEY 16
+#include "quantizer_parameters.h"
 
 typedef float type_data;
 
@@ -15,7 +13,7 @@ typedef float type_data;
  * @param size Width and height of subbnad.
  * @param step_size Step size(deltab).
  */
-KERNEL void subband_dequantization_lossy(GLOBAL int *idata, int2 isize, GLOBAL type_data *odata, int odataOffset, int2 osize, int2 cblk_size, const float convert_factor)
+KERNEL void subband_dequantization_lossy(GLOBAL int *idata, int2 isize, GLOBAL int *odata, int odataOffset, int2 osize, int2 cblk_size, const float convert_factor)
 {
 	int i = getLocalId(0);
 	int j = getLocalId(1);
@@ -30,7 +28,7 @@ KERNEL void subband_dequantization_lossy(GLOBAL int *idata, int2 isize, GLOBAL t
 	{
 		while (i < cblk_size.x && n < isize.x)
 		{
-			odata[out] = ((type_data) ((idata[in] >= 0) ? idata[in] : -(idata[in] & 0x7FFFFFFF))) * convert_factor;
+			odata[out] = (int)(idata[in] * convert_factor); //cast to int will round towards zero
 			i += BLOCKSIZEX;
 			n = i + getGroupId(0) * cblk_size.x;
 			in = n + m * isize.x;

@@ -468,34 +468,7 @@ typedef int CtxReg;
 		return 15;
 }
 
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
-
-CONSTANT float distWeights[2][4][4] = {
-{//Lossless
-//		LH,      HL,      HH,     LLend
-	{0.1000f, 0.1000f, 0.0500f, 1.0000f},  //level 0 = biggest subbands (unimportant)
-	{0.2000f, 0.2000f, 0.1000f, 1.0000f},  //      1
-	{0.4000f, 0.4000f, 0.2000f, 1.0000f},  //      2
-	{0.8000f, 0.8000f, 0.4000f, 1.0000f}   //      3 = smallest, contains LL
-}, {//Lossy
-/*	{ 0.0010f, 0.0010f, 0.0005f, 1.0000f},
-	{ 0.1000f, 0.1000f, 0.0250f, 1.0000f},
-	{ 0.3000f, 0.3000f, 0.0800f, 1.0000f},
-	{ 0.8000f, 0.8000f, 0.4000f, 1.0000f}*/
-	{0.0100f, 0.0100f, 0.0050f, 1.0000f},
-	{0.2000f, 0.2000f, 0.1000f, 1.0000f},
-	{0.4000f, 0.4000f, 0.2000f, 1.0000f},
-	{0.8000f, 0.8000f, 0.4000f, 1.0000f}
-} };
-
- float getDISW(CodeBlockAdditionalInfo info)
-{
-	return distWeights[info.compType][MIN(info.dwtLevel, 3)][info.subband] * info.stepSize * info.stepSize / ((float)(info.width * info.height));
-}
-
-
- char RLDecodeFunctor(CtxWindow *window, MQDecoder* dec)
+char RLDecodeFunctor(CtxWindow *window, MQDecoder* dec)
 {
 	char rest = 0;
 
@@ -515,28 +488,17 @@ CONSTANT float distWeights[2][4][4] = {
 	return rest;
 }
 
-
-
-
- void SigDecodeFunctor(CtxWindow *window, CtxReg sig, MQDecoder* dec, int stripId, int subband)
+void SigDecodeFunctor(CtxWindow *window, CtxReg sig, MQDecoder* dec, int stripId, int subband)
 {
 	window->c |= mqDecode(dec, getSPCX(sig, stripId, subband)) << (3 * stripId);
 }
-
-
-
-
- void SignDecodeFunctor(CtxWindow *window, CtxReg sig, MQDecoder* dec, int stripId)
+void SignDecodeFunctor(CtxWindow *window, CtxReg sig, MQDecoder* dec, int stripId)
 {
 	unsigned char cx = getSICX(sig, buildCtxReg(window, 13), stripId);
 
 	window->c |= (mqDecode(dec, cx & 0xF) ^ ((cx >> 4) & 1) & 1) << (13 + 3 * stripId);
 }	
-
-
-
-
- void CleanUpPassFunctor(const CodeBlockAdditionalInfo info, CtxWindow *window, MQDecoder* mq, float *sum_dist, unsigned char bitplane)
+void CleanUpPassFunctor(const CodeBlockAdditionalInfo info, CtxWindow *window, MQDecoder* mq, float *sum_dist, unsigned char bitplane)
 {
 	char rest;
 
@@ -574,9 +536,7 @@ CONSTANT float distWeights[2][4][4] = {
 	}
 }
 
-
-
- void SigPropPassFunctor(const CodeBlockAdditionalInfo info, CtxWindow *window, MQDecoder* mq, float *sum_dist, unsigned char bitplane)
+void SigPropPassFunctor(const CodeBlockAdditionalInfo info, CtxWindow *window, MQDecoder* mq, float *sum_dist, unsigned char bitplane)
 {
 	CtxReg sig = buildCtxReg(window, 1); // build significance context register
 
@@ -610,10 +570,7 @@ CONSTANT float distWeights[2][4][4] = {
 	}
 }
 
-
-
-
- void MagRefPassFunctor(const CodeBlockAdditionalInfo info, CtxWindow *window, MQDecoder* mq, float *sum_dist, unsigned char bitplane)
+void MagRefPassFunctor(const CodeBlockAdditionalInfo info, CtxWindow *window, MQDecoder* mq, float *sum_dist, unsigned char bitplane)
 {
 	for(int i = 0; i < 4; i++)
 	{
@@ -628,7 +585,7 @@ CONSTANT float distWeights[2][4][4] = {
 	}
 }
 
- void initDecodingCoeffs(const CodeBlockAdditionalInfo info, GLOBAL unsigned int  *coeffs,GLOBAL int* decodedCoefficients)
+void initDecodingCoeffs(const CodeBlockAdditionalInfo info, GLOBAL unsigned int  *coeffs,GLOBAL int* decodedCoefficients)
 {
     int maxIndex =   sizeof(int) * info.nominalWidth * info.nominalHeight;
 	for(int i = 0; i < info.width; i++)
@@ -651,7 +608,7 @@ CONSTANT float distWeights[2][4][4] = {
 		}
 }
 
- void uploadSigns(const CodeBlockAdditionalInfo info, GLOBAL unsigned int  *coeffs, GLOBAL int* decodedCoefficients)
+void uploadSigns(const CodeBlockAdditionalInfo info, GLOBAL unsigned int  *coeffs, GLOBAL int* decodedCoefficients)
 {
 	unsigned char signOffset = sizeof(int) * 8 - 1;
 
@@ -786,8 +743,7 @@ CONSTANT float distWeights[2][4][4] = {
 	}
 }
 
- 
- void BITPLANE_WINDOW_SCAN_SIG( CodeBlockAdditionalInfo info, GLOBAL unsigned int  *coeffs, MQDecoder* enc, float *sum_dist, unsigned char bitplane) {
+void BITPLANE_WINDOW_SCAN_SIG( CodeBlockAdditionalInfo info, GLOBAL unsigned int  *coeffs, MQDecoder* enc, float *sum_dist, unsigned char bitplane) {
 	
 	 CtxWindow window;
  	 window.pos = -1;
@@ -861,9 +817,3 @@ KERNEL void g_decode(GLOBAL unsigned int *stBuffers, GLOBAL unsigned char *codes
 		uploadSigns(codeblockInfo, st,decodedCoefficients);
 	}
 }
-
-
-
-
-
-

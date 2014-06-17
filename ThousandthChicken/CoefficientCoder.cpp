@@ -79,7 +79,7 @@ void CoefficientCoder::decode_tile(type_tile *tile)
 
 //	printf("%d\n", num_tasks);
 	decodeInit(tasks, num_tasks, &tile->coefficients);
-	float t = decode(tasks, num_tasks, &tile->coefficients);
+	float t = decode(num_tasks);
 
 	printf("coefficient decoder kernel consumption: %f ms\n", t);
 	free(tasks);
@@ -211,11 +211,10 @@ void CoefficientCoder::decodeInit(EntropyCodingTaskInfo *infos, int count, void*
 
 }
 
-float CoefficientCoder::decode(EntropyCodingTaskInfo *infos, int count, void** coefficients)
+float CoefficientCoder::decode(int codeBlocks)
 {
     cl_int err = CL_SUCCESS;
 
-	int codeBlocks = count;
 	int maxOutLength = MAX_CODESTREAM_SIZE;
 
 	int argNum = 0;
@@ -238,7 +237,7 @@ float CoefficientCoder::decode(EntropyCodingTaskInfo *infos, int count, void** c
     SAMPLE_CHECK_ERRORS(err);
 
 	double t1 = time_stamp();
-	const int THREADS = 16;
+	const int THREADS = 4;
 	int groups = (int) ceil((float) codeBlocks / THREADS);
 	
 	size_t global_work_size[1] = {groups * THREADS};

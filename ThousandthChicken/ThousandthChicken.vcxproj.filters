@@ -251,5 +251,8 @@
     <ClInclude Include="MemoryMapped.h">
       <Filter>Decoder</Filter>
     </ClInclude>
+    <ClInclude Include="quantizer_parameters.h">
+      <Filter>Quantizer</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

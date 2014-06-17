@@ -18,6 +18,8 @@ DWT::DWT(KernelInitInfoBase initInfo) : initInfo(initInfo)
 	r53 = new DWTReverse53(initInfo);
 	f97 = new DWTForward97(initInfo);
 	r97 = new DWTReverse97(initInfo);
+
+	memset(d_idata, 0, 256 * sizeof(tDeviceMem));
 }
 
 
@@ -31,6 +33,11 @@ DWT::~DWT(void)
 		delete f97;
 	if (r97)
 		delete r97;
+
+	for (int i = 0; i < 256; ++i) {
+		cl_int err = clReleaseMemObject((cl_mem)d_idata[i]);
+		SAMPLE_CHECK_ERRORS(err);
+	}
 }
 
 
@@ -49,7 +56,7 @@ DWT::~DWT(void)
  */
 tDeviceMem DWT::iwt_2d(short filter, type_tile_comp *tile_comp) {
 	/* Input data */
-	tDeviceMem  d_idata = (tDeviceMem)tile_comp->img_data_d;
+	d_idata[tile_comp->tile_comp_no] = (tDeviceMem)tile_comp->img_data_d;
 	/* Result data */
 
 	int dataSize = tile_comp->parent_tile->parent_img->wavelet_type ? sizeof(type_data) : sizeof(int);
@@ -78,15 +85,12 @@ tDeviceMem DWT::iwt_2d(short filter, type_tile_comp *tile_comp) {
 	switch(filter)
 	{
 		case DWT97:
-			r97->run(d_idata, d_odata, tile_comp->width, tile_comp->height, tile_comp->num_dlvls);
+			r97->run(d_idata[tile_comp->tile_comp_no] , d_odata, tile_comp->width, tile_comp->height, tile_comp->num_dlvls);
 			break;
 		case DWT53:
-			r53->run(d_idata, d_odata, tile_comp->width, tile_comp->height, tile_comp->num_dlvls);
+			r53->run(d_idata[tile_comp->tile_comp_no] , d_odata, tile_comp->width, tile_comp->height, tile_comp->num_dlvls);
 			break;
 	}
-
-	err = clReleaseMemObject((cl_mem)d_idata);
-    SAMPLE_CHECK_ERRORS(err);
 	tile_comp->img_data_d = d_odata;
 	return d_odata;
 }

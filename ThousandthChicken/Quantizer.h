@@ -4,10 +4,6 @@
 #include "DeviceKernel.h"
 
 
-#define BLOCKSIZEX 16
-#define BLOCKSIZEY 16
-#define COMPUTED_ELEMS_BY_THREAD 4
-
 struct type_subband;
 struct type_tile;
 
@@ -25,6 +21,7 @@ private:
 	KernelInitInfoBase initInfo;
 	DeviceKernel* lossyKernel;
 	DeviceKernel* losslessKernel;
+	cl_mem d_subbandCodeblockCoefficients;
 
 };
 
